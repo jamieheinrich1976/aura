@@ -5,84 +5,104 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>AURA — Good Vibes Finder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500&family=Space+Grotesk:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body { height:100%; overflow:hidden; background:#06050d; }
-  body {
-    font-family:'Space Grotesk', system-ui, sans-serif;
-    color:#e9e4f5;
-    touch-action:manipulation;
-  }
-  #stage { position:fixed; inset:0; width:100%; height:100%; display:block; }
+  body { font-family:'Space Grotesk', system-ui, sans-serif; color:#e9e4f5; touch-action:manipulation; }
+  canvas { display:block; }
+  #stage { position:fixed; inset:0; width:100%; height:100%; z-index:0; }
 
-  /* ---------- UI layer ---------- */
   #ui {
-    position:fixed; inset:0; display:flex; flex-direction:column;
-    align-items:center; justify-content:space-between;
-    padding:calc(env(safe-area-inset-top,0px) + 28px) 24px calc(env(safe-area-inset-bottom,0px) + 34px);
-    pointer-events:none; z-index:2;
+    position:fixed; inset:0; z-index:2; pointer-events:none;
+    display:flex; flex-direction:column; align-items:center;
+    padding-top:calc(env(safe-area-inset-top,0px) + 22px);
   }
-  .brand {
-    letter-spacing:.55em; font-size:12px; font-weight:300; text-transform:uppercase;
-    opacity:.75; text-indent:.55em;
-  }
-  .brand b { font-weight:400; }
+  .brand { letter-spacing:.55em; text-indent:.55em; font-size:11px; font-weight:300; text-transform:uppercase; opacity:.7; }
 
-  #readout { text-align:center; transition:opacity 1s ease; }
+  #readout { text-align:center; margin-top:8px; opacity:0; transition:opacity 1s ease; }
   #vibeWord {
-    font-family:'Fraunces', Georgia, serif; font-weight:300; font-size:44px;
-    letter-spacing:.02em; line-height:1.05;
-    background:linear-gradient(120deg, #cfc6ff, #fff8e6, #ffd9a0);
+    font-family:'Fraunces', Georgia, serif; font-weight:300; font-size:34px; line-height:1.05; min-height:40px;
+    background:linear-gradient(120deg,#cfc6ff,#fff8e6,#ffd9a0);
     -webkit-background-clip:text; background-clip:text; color:transparent;
-    filter:drop-shadow(0 0 18px rgba(255,220,160,.15));
-    transition:opacity .6s ease;
-    min-height:52px;
   }
-  #vibeScore {
-    margin-top:10px; font-size:13px; letter-spacing:.35em; text-transform:uppercase;
-    opacity:.65; font-weight:300; text-indent:.35em;
-  }
-  #hint {
-    margin-top:6px; font-size:12px; letter-spacing:.08em; opacity:.4; font-weight:300;
-  }
+  #vibeScore { margin-top:6px; font-size:12px; letter-spacing:.35em; text-indent:.35em; text-transform:uppercase; opacity:.65; font-weight:300; }
+  #moveTag { margin-top:5px; font-size:11px; letter-spacing:.14em; opacity:0; font-weight:300; color:#bfe9ff; transition:opacity .4s; }
 
-  /* ---------- start overlay ---------- */
+  /* voice chip */
+  #voiceChip {
+    position:fixed; top:calc(env(safe-area-inset-top,0px) + 86px); right:16px; z-index:3;
+    display:flex; align-items:center; gap:9px;
+    padding:9px 13px 9px 10px; border-radius:999px;
+    background:rgba(18,14,34,.55); border:1px solid rgba(255,255,255,.14);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    opacity:0; transform:translateY(-6px) scale(.95); transition:all .45s cubic-bezier(.2,.9,.3,1.2);
+    pointer-events:none;
+  }
+  #voiceChip.on { opacity:1; transform:none; }
+  #voiceChip svg { width:20px; height:20px; }
+  #voiceChip .vc { display:flex; flex-direction:column; line-height:1.2; }
+  #voiceChip .vc b { font-size:11px; font-weight:500; letter-spacing:.12em; }
+  #voiceChip .vc span { font-size:10px; opacity:.65; letter-spacing:.08em; }
+
+  /* field map card */
+  #mapCard {
+    position:fixed; left:12px; right:12px; z-index:2;
+    bottom:calc(env(safe-area-inset-bottom,0px) + 12px);
+    height:34vh; min-height:210px; max-height:300px;
+    border-radius:22px; overflow:hidden;
+    background:rgba(12,9,24,.5); border:1px solid rgba(255,255,255,.12);
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    opacity:0; transform:translateY(14px); transition:all .8s ease .3s;
+  }
+  #mapCard.on { opacity:1; transform:none; }
+  #mapHead {
+    position:absolute; top:0; left:0; right:0; z-index:2;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:11px 15px; font-size:10px; letter-spacing:.3em; text-transform:uppercase; opacity:.75;
+  }
+  #gzTag { letter-spacing:.1em; text-transform:none; color:#ffd98f; opacity:0; transition:opacity .5s; }
+  #gzTag.on { opacity:1; }
+  #mapCanvas { position:absolute; inset:0; width:100%; height:100%; }
+  #coords {
+    position:absolute; bottom:9px; left:15px; z-index:2;
+    font-size:9px; letter-spacing:.12em; opacity:.45; font-variant-numeric:tabular-nums;
+  }
+  #scaleBar { position:absolute; bottom:9px; right:15px; z-index:2; font-size:9px; letter-spacing:.12em; opacity:.45; }
+
+  /* start overlay */
   #startOverlay {
     position:fixed; inset:0; z-index:5; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:26px; text-align:center;
+    align-items:center; justify-content:center; gap:24px; text-align:center;
     background:radial-gradient(ellipse at 50% 42%, #17122e 0%, #06050d 70%);
     padding:32px; transition:opacity .9s ease;
   }
   #startOverlay.hidden { opacity:0; pointer-events:none; }
   .ovTitle {
     font-family:'Fraunces', Georgia, serif; font-weight:300; font-size:52px; line-height:1.05;
-    background:linear-gradient(130deg, #b7a6ff 0%, #7fe7d4 48%, #ffd166 100%);
+    background:linear-gradient(130deg,#b7a6ff 0%,#7fe7d4 48%,#ffd166 100%);
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
-  .ovSub { max-width:300px; font-size:14px; line-height:1.65; opacity:.62; font-weight:300; }
+  .ovSub { max-width:300px; font-size:13.5px; line-height:1.65; opacity:.62; font-weight:300; }
   #startBtn {
     pointer-events:auto; cursor:pointer; border:none; outline:none;
     font-family:'Space Grotesk',sans-serif; font-size:13px; letter-spacing:.4em; text-indent:.4em;
-    text-transform:uppercase; color:#0b0817; font-weight:400;
-    padding:20px 44px; border-radius:999px;
+    text-transform:uppercase; color:#0b0817; font-weight:500;
+    padding:20px 42px; border-radius:999px;
     background:linear-gradient(120deg,#cfc0ff,#8fe9d6,#ffd98f);
     box-shadow:0 0 42px rgba(160,140,255,.45), 0 0 90px rgba(255,214,120,.18);
-    transition:transform .2s ease, box-shadow .3s ease;
+    transition:transform .2s ease;
   }
   #startBtn:active { transform:scale(.96); }
-  .ovNote { font-size:11px; opacity:.35; letter-spacing:.1em; max-width:280px; line-height:1.6; }
+  .ovNote { font-size:10.5px; opacity:.35; letter-spacing:.08em; max-width:290px; line-height:1.6; }
 
   #err {
-    position:fixed; left:50%; bottom:110px; transform:translateX(-50%);
-    z-index:6; font-size:12px; letter-spacing:.05em; color:#ffb4c0;
-    background:rgba(40,10,20,.6); border:1px solid rgba(255,120,150,.25);
-    padding:12px 18px; border-radius:14px; display:none; max-width:86vw; text-align:center;
-    backdrop-filter:blur(8px);
+    position:fixed; left:50%; bottom:120px; transform:translateX(-50%);
+    z-index:6; font-size:12px; color:#ffb4c0; background:rgba(40,10,20,.6);
+    border:1px solid rgba(255,120,150,.25); padding:12px 18px; border-radius:14px;
+    display:none; max-width:86vw; text-align:center; backdrop-filter:blur(8px);
   }
-
-  @media (max-height:640px){ .ovTitle{font-size:40px} #vibeWord{font-size:34px} }
-  @media (prefers-reduced-motion:reduce){ * { transition:none !important; } }
+  @media (max-height:700px){ .ovTitle{font-size:42px} #vibeWord{font-size:28px} }
 </style>
 </head>
 <body>
@@ -90,235 +110,434 @@
 <canvas id="stage"></canvas>
 
 <div id="ui">
-  <div class="brand">A U R A <b>·</b> good vibes finder</div>
-  <div></div>
-  <div id="readout" style="opacity:0">
+  <div class="brand">A U R A · field two</div>
+  <div id="readout">
     <div id="vibeWord">listening…</div>
     <div id="vibeScore">— vibe</div>
-    <div id="hint">move slowly through the room</div>
+    <div id="moveTag">◌ moving — tracing your path</div>
   </div>
+</div>
+
+<div id="voiceChip">
+  <svg viewBox="0 0 24 24" fill="none" id="vcIcon">
+    <circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.6"/>
+    <path d="M5.5 19c.9-3.4 3.5-5 6.5-5s5.6 1.6 6.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+  </svg>
+  <div class="vc"><b id="vcLabel">VOICE</b><span id="vcSub">reading…</span></div>
+</div>
+
+<div id="mapCard">
+  <div id="mapHead"><span>Field map</span><span id="gzTag">✦ golden zone marked</span></div>
+  <canvas id="mapCanvas"></canvas>
+  <div id="coords">—</div>
+  <div id="scaleBar">5 m —</div>
 </div>
 
 <div id="startOverlay">
   <div class="ovTitle">AURA</div>
-  <div class="ovSub">A living mood ring for the room you're in. It listens to the texture of the sound around you — warmth, harshness, calm, chaos — and glows toward gold when the atmosphere feels good.</div>
+  <div class="ovSub">A living mood ring for the room you're in. It listens, feels you move, and maps the good energy as you drift through a space. Follow the glow to the golden zone.</div>
   <button id="startBtn">Begin listening</button>
-  <div class="ovNote">Uses your microphone, live only — nothing is recorded or sent anywhere. Headphones off works best.</div>
+  <div class="ovNote">Uses mic, motion + location — live only, nothing recorded or sent anywhere. It will ask for three permissions, allow all three for the full experience.</div>
 </div>
 
 <div id="err"></div>
 
 <script>
 (() => {
-  const canvas = document.getElementById('stage');
-  const ctx = canvas.getContext('2d');
-  const startOverlay = document.getElementById('startOverlay');
-  const startBtn = document.getElementById('startBtn');
+  /* ---------------- canvases ---------------- */
+  const stage = document.getElementById('stage');
+  const ctx = stage.getContext('2d');
+  const mapCanvas = document.getElementById('mapCanvas');
+  const mctx = mapCanvas.getContext('2d');
+  let W,H,DPR, MW,MH;
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio||1, 2);
+    W = stage.width = Math.floor(innerWidth*DPR);
+    H = stage.height = Math.floor(innerHeight*DPR);
+    stage.style.width = innerWidth+'px'; stage.style.height = innerHeight+'px';
+    const r = mapCanvas.getBoundingClientRect();
+    MW = mapCanvas.width = Math.floor(r.width*DPR);
+    MH = mapCanvas.height = Math.floor(r.height*DPR);
+  }
+  addEventListener('resize', () => setTimeout(resize, 60));
+
   const readout = document.getElementById('readout');
   const vibeWordEl = document.getElementById('vibeWord');
   const vibeScoreEl = document.getElementById('vibeScore');
+  const moveTag = document.getElementById('moveTag');
+  const voiceChip = document.getElementById('voiceChip');
+  const vcLabel = document.getElementById('vcLabel');
+  const vcSub = document.getElementById('vcSub');
+  const vcIcon = document.getElementById('vcIcon');
+  const mapCard = document.getElementById('mapCard');
+  const gzTag = document.getElementById('gzTag');
+  const coordsEl = document.getElementById('coords');
+  const scaleEl = document.getElementById('scaleBar');
   const errEl = document.getElementById('err');
 
-  let W, H, DPR;
-  function resize(){
-    DPR = Math.min(window.devicePixelRatio || 1, 2);
-    W = canvas.width = Math.floor(innerWidth * DPR);
-    H = canvas.height = Math.floor(innerHeight * DPR);
-    canvas.style.width = innerWidth + 'px';
-    canvas.style.height = innerHeight + 'px';
-  }
-  addEventListener('resize', resize); resize();
-
-  /* ================= AUDIO ================= */
-  let audioCtx, analyser, freqData, timeData, running = false;
+  /* ---------------- audio ---------------- */
+  let audioCtx, analyser, freqData, timeData, running=false;
   const rmsHistory = [];
+  let vibe=0.35, vibeFast=0.35, level=0;
+  let bins = new Array(48).fill(0);          // circular spectrum ring
+  // voice
+  let voiceConf=0, voicePitch=0, pitchJitter=0, voiceVibe=0.5, voiceCentroid=800;
 
   async function startAudio(){
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
     const stream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation:false, noiseSuppression:false, autoGainControl:false }
+      audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false }
     });
     const src = audioCtx.createMediaStreamSource(stream);
     analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 2048;
-    analyser.smoothingTimeConstant = 0.7;
+    analyser.fftSize = 2048; analyser.smoothingTimeConstant = 0.65;
     src.connect(analyser);
     freqData = new Uint8Array(analyser.frequencyBinCount);
     timeData = new Float32Array(analyser.fftSize);
     running = true;
   }
 
-  /* vibe model: 0..1 — smoothed slowly like a mood ring warming */
-  let vibe = 0.35;         // displayed (slow)
-  let vibeFast = 0.35;     // raw estimate
-  let level = 0;           // smoothed loudness for pulsing
+  function autoCorrelatePitch(buf, sr){
+    let rms=0; for(let i=0;i<buf.length;i++) rms+=buf[i]*buf[i];
+    rms = Math.sqrt(rms/buf.length);
+    if(rms < 0.006) return {pitch:0, clarity:0};
+    const minLag = Math.floor(sr/350), maxLag = Math.floor(sr/75);
+    let bestLag=0, bestCorr=0;
+    for(let lag=minLag; lag<=maxLag; lag+=1){
+      let c=0;
+      for(let i=0;i<buf.length-lag;i+=2) c += buf[i]*buf[i+lag];
+      if(c>bestCorr){ bestCorr=c; bestLag=lag; }
+    }
+    let norm=0; for(let i=0;i<buf.length;i+=2) norm += buf[i]*buf[i];
+    const clarity = norm>0 ? bestCorr/norm : 0;
+    return { pitch: bestLag? sr/bestLag : 0, clarity };
+  }
 
   function analyze(){
-    if(!running) return;
     analyser.getByteFrequencyData(freqData);
     analyser.getFloatTimeDomainData(timeData);
 
-    // RMS loudness
-    let sum = 0;
-    for(let i=0;i<timeData.length;i++) sum += timeData[i]*timeData[i];
+    let sum=0; for(let i=0;i<timeData.length;i++) sum+=timeData[i]*timeData[i];
     const rms = Math.sqrt(sum/timeData.length);
-    level += (Math.min(1, rms*9) - level) * 0.12;
+    level += (Math.min(1, rms*9) - level)*0.14;
+    rmsHistory.push(rms); if(rmsHistory.length>90) rmsHistory.shift();
 
-    rmsHistory.push(rms);
-    if(rmsHistory.length > 90) rmsHistory.shift();
-
-    // spectral centroid + high-frequency harshness
-    const nyquist = audioCtx.sampleRate / 2;
-    let total = 0, weighted = 0, high = 0;
+    const nyq = audioCtx.sampleRate/2;
+    let total=0, weighted=0, high=0;
     for(let i=1;i<freqData.length;i++){
-      const v = freqData[i];
-      const f = i / freqData.length * nyquist;
-      total += v;
-      weighted += v * f;
-      if(f > 4500) high += v;
+      const v=freqData[i], f=i/freqData.length*nyq;
+      total+=v; weighted+=v*f; if(f>4500) high+=v;
     }
-    const centroid = total > 0 ? weighted/total : 0;        // Hz
-    const highRatio = total > 0 ? high/total : 0;           // 0..1
+    const centroid = total>0? weighted/total : 0;
+    const highRatio = total>0? high/total : 0;
 
-    // steadiness: coefficient of variation of recent loudness
+    // spectrum ring bins (log-ish mapping up to ~8k)
+    const maxBin = Math.floor(freqData.length * (8000/nyq));
+    for(let b=0;b<bins.length;b++){
+      const i0 = Math.floor(Math.pow(b/bins.length,1.6)*maxBin);
+      const i1 = Math.max(i0+1, Math.floor(Math.pow((b+1)/bins.length,1.6)*maxBin));
+      let m=0; for(let i=i0;i<i1;i++) m=Math.max(m,freqData[i]);
+      bins[b] += (m/255 - bins[b])*0.35;
+    }
+
     const mean = rmsHistory.reduce((a,b)=>a+b,0)/rmsHistory.length;
-    let varsum = 0;
-    for(const r of rmsHistory) varsum += (r-mean)*(r-mean);
-    const cv = mean > 0.0015 ? Math.sqrt(varsum/rmsHistory.length)/mean : 0.4;
+    let vs=0; for(const r of rmsHistory) vs+=(r-mean)*(r-mean);
+    const cv = mean>0.0015 ? Math.sqrt(vs/rmsHistory.length)/mean : 0.4;
 
-    /* ---- component scores 0..1 ---- */
-    // loudness: gentle ambient sweet spot; near-silence calm-neutral, blasting = harsh
-    const db = 20*Math.log10(Math.max(rms, 1e-6));
+    const db = 20*Math.log10(Math.max(rms,1e-6));
     let loudScore;
-    if(db < -58)      loudScore = 0.55;                       // deep quiet: serene
-    else if(db < -34) loudScore = 0.55 + (db+58)/24 * 0.45;   // rising into a warm hum
-    else if(db < -18) loudScore = 1.0 - (db+34)/16 * 0.35;    // lively but ok
-    else              loudScore = Math.max(0, 0.65 - (db+18)/12 * 0.65); // loud/harsh
-
-    // warmth: low-mid centroid = warm; screechy high centroid = tense
-    const warmScore = 1 - Math.min(1, Math.max(0,(centroid-500))/3800);
-
-    // smoothness: hiss & clatter penalty
-    const smoothScore = 1 - Math.min(1, highRatio*2.6);
-
-    // steadiness: chaotic spiky rooms feel off
-    const steadyScore = 1 - Math.min(1, Math.max(0, cv-0.25)/1.1);
+    if(db<-58) loudScore=0.55;
+    else if(db<-34) loudScore=0.55+(db+58)/24*0.45;
+    else if(db<-18) loudScore=1.0-(db+34)/16*0.35;
+    else loudScore=Math.max(0,0.65-(db+18)/12*0.65);
+    const warmScore = 1-Math.min(1,Math.max(0,(centroid-500))/3800);
+    const smoothScore = 1-Math.min(1,highRatio*2.6);
+    const steadyScore = 1-Math.min(1,Math.max(0,cv-0.25)/1.1);
 
     vibeFast = loudScore*0.34 + warmScore*0.26 + smoothScore*0.20 + steadyScore*0.20;
+    vibe += (vibeFast - vibe)*0.014;
 
-    // slow mood-ring drift toward the estimate
-    vibe += (vibeFast - vibe) * 0.012;
+    /* ---- voice detection ---- */
+    const {pitch, clarity} = autoCorrelatePitch(timeData, audioCtx.sampleRate);
+    const isVoiceFrame = clarity>0.45 && pitch>75 && pitch<340 && level>0.06;
+    voiceConf += ((isVoiceFrame?1:0) - voiceConf) * (isVoiceFrame? 0.10 : 0.035);
+    if(isVoiceFrame){
+      if(voicePitch===0) voicePitch = pitch;
+      pitchJitter += (Math.abs(pitch-voicePitch)/Math.max(voicePitch,1) - pitchJitter)*0.1;
+      voicePitch += (pitch-voicePitch)*0.15;
+      voiceCentroid += (centroid-voiceCentroid)*0.1;
+      const vWarm = 1-Math.min(1,Math.max(0,(voiceCentroid-600))/3000); // warm tone
+      const vCalm = 1-Math.min(1,pitchJitter*6);                        // steady, soothing
+      const vEase = 1-Math.min(1,Math.max(0,db+14)/14);                 // not yelling
+      const target = vWarm*0.4 + vCalm*0.35 + vEase*0.25;
+      voiceVibe += (target - voiceVibe)*0.04;
+    }
   }
 
-  /* ================= VISUALS ================= */
-  // hue path: 262 violet -> 175 teal -> 44 gold
-  function vibeHue(v){
-    return v < 0.5 ? 262 + (175-262)*(v/0.5)
-                   : 175 + (44-175)*((v-0.5)/0.5);
+  /* ---------------- motion ---------------- */
+  let moveLevel=0, heading=0, ripples=[];
+  function onMotion(e){
+    const a = e.acceleration;
+    if(!a || a.x===null) return;
+    const mag = Math.sqrt(a.x*a.x + a.y*a.y + a.z*a.z);
+    moveLevel += (Math.min(1, Math.max(0,mag-0.35)/3.2) - moveLevel)*0.08;
+  }
+  function onOrient(e){
+    if(e.webkitCompassHeading!==undefined) heading = e.webkitCompassHeading*Math.PI/180;
+    else if(e.alpha!==null) heading = (360-e.alpha)*Math.PI/180;
   }
 
-  const P = [];
-  const PCOUNT = 110;
-  for(let i=0;i<PCOUNT;i++){
-    P.push({
-      a: Math.random()*Math.PI*2,
-      r: 0.55 + Math.random()*0.9,
-      sp: (0.0018 + Math.random()*0.004) * (Math.random()<0.5?-1:1),
-      sz: 0.6 + Math.random()*2.2,
-      ph: Math.random()*Math.PI*2,
-      wob: 0.02 + Math.random()*0.08
-    });
+  /* ---------------- position / trail ---------------- */
+  let origin=null, pos={x:0,y:0}, lastFixTime=0, lastLL=null;
+  const trail=[];                     // {x,y,vibe}
+  let best={x:0,y:0,v:0,has:false};
+  let gzPing=0;
+
+  function startGeo(){
+    if(!navigator.geolocation) return;
+    navigator.geolocation.watchPosition(p=>{
+      const {latitude:lat, longitude:lng, accuracy} = p.coords;
+      lastLL = {lat,lng,accuracy};
+      if(!origin) origin={lat,lng};
+      const x = (lng-origin.lng)*111320*Math.cos(origin.lat*Math.PI/180);
+      const y = -(lat-origin.lat)*110540;
+      // blend so it doesn't teleport
+      pos.x += (x-pos.x)*0.25; pos.y += (y-pos.y)*0.25;
+      lastFixTime = performance.now();
+    }, ()=>{}, {enableHighAccuracy:true, maximumAge:1000, timeout:15000});
   }
 
-  let t = 0;
-  function draw(){
+  let lastTrailT=0, lastDR=0;
+  function updatePosition(now){
+    // dead-reckoning between/without GPS fixes so indoor walking still traces
+    const dt = lastDR? (now-lastDR)/1000 : 0; lastDR=now;
+    if(moveLevel>0.12 && now-lastFixTime>1500){
+      const sp = 0.9*moveLevel;   // m/s
+      pos.x += Math.sin(heading)*sp*dt;
+      pos.y -= Math.cos(heading)*sp*dt;
+    }
+    // record trail
+    const last = trail[trail.length-1];
+    const distOk = !last || Math.hypot(pos.x-last.x,pos.y-last.y)>0.6;
+    if(now-lastTrailT>900 && distOk){
+      trail.push({x:pos.x,y:pos.y,vibe});
+      if(trail.length>260) trail.shift();
+      lastTrailT=now;
+      if(vibe > best.v + 0.015 || !best.has){
+        best={x:pos.x,y:pos.y,v:vibe,has:true};
+        if(vibe>0.6){ gzTag.classList.add('on'); gzPing=1; }
+      }
+    }
+  }
+
+  /* ---------------- visuals ---------------- */
+  function vibeHue(v){ return v<0.5 ? 262+(175-262)*(v/0.5) : 175+(44-175)*((v-0.5)/0.5); }
+
+  const P=[]; for(let i=0;i<95;i++) P.push({
+    a:Math.random()*Math.PI*2, r:0.55+Math.random()*0.9,
+    sp:(0.0018+Math.random()*0.004)*(Math.random()<0.5?-1:1),
+    sz:0.6+Math.random()*2.2, ph:Math.random()*Math.PI*2, wob:0.02+Math.random()*0.08
+  });
+
+  let t=0, frame=0;
+  function draw(now){
     requestAnimationFrame(draw);
-    if(running) analyze();
-    t += 0.008;
+    t+=0.008; frame++;
+    if(running){ analyze(); updatePosition(now); }
 
-    const cx = W/2, cy = H*0.46;
-    const base = Math.min(W,H);
-    const hue = vibeHue(vibe);
-    const sat = 62 + vibe*30;
-    const pulse = 1 + level*0.22 + Math.sin(t*2.4)*0.015;
-    const orbR = base*0.16*pulse;
+    const cx=W/2, cy=H*0.33, base=Math.min(W,H);
+    const hue=vibeHue(vibe), sat=62+vibe*30;
+    const pulse=1+level*0.22+Math.sin(t*2.4)*0.015;
+    const orbR=base*0.135*pulse;
 
-    // background wash
-    const bg = ctx.createRadialGradient(cx,cy,0,cx,cy,base*0.95);
-    bg.addColorStop(0, `hsla(${hue},${sat*0.7}%,${9+vibe*7}%,1)`);
-    bg.addColorStop(1, '#05040c');
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = bg;
-    ctx.fillRect(0,0,W,H);
+    const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,base*0.95);
+    bg.addColorStop(0,`hsla(${hue},${sat*0.7}%,${9+vibe*7}%,1)`);
+    bg.addColorStop(1,'#05040c');
+    ctx.globalCompositeOperation='source-over';
+    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+    ctx.globalCompositeOperation='lighter';
 
-    ctx.globalCompositeOperation = 'lighter';
-
-    // outer aura layers
+    // aura
     for(let i=3;i>=1;i--){
-      const r = orbR*(1.6 + i*0.9 + level*0.8);
-      const g = ctx.createRadialGradient(cx,cy,orbR*0.2,cx,cy,r);
-      g.addColorStop(0, `hsla(${hue},${sat}%,62%,${0.10+vibe*0.05})`);
-      g.addColorStop(1, 'hsla(0,0%,0%,0)');
-      ctx.fillStyle = g;
-      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+      const r=orbR*(1.6+i*0.9+level*0.8);
+      const g=ctx.createRadialGradient(cx,cy,orbR*0.2,cx,cy,r);
+      g.addColorStop(0,`hsla(${hue},${sat}%,62%,${0.10+vibe*0.05})`);
+      g.addColorStop(1,'hsla(0,0%,0%,0)');
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+    }
+    // core
+    const core=ctx.createRadialGradient(cx-orbR*0.25,cy-orbR*0.3,orbR*0.05,cx,cy,orbR);
+    core.addColorStop(0,`hsla(${hue+20},100%,92%,.95)`);
+    core.addColorStop(0.45,`hsla(${hue},${sat}%,64%,.85)`);
+    core.addColorStop(1,`hsla(${hue-18},${sat}%,38%,0)`);
+    ctx.fillStyle=core; ctx.beginPath(); ctx.arc(cx,cy,orbR,0,Math.PI*2); ctx.fill();
+
+    // live spectrum ring — the frequencies, moving with the room
+    const ringR=orbR*1.5;
+    for(let b=0;b<bins.length;b++){
+      const ang=(b/bins.length)*Math.PI*2 - Math.PI/2;
+      const len=bins[b]*orbR*0.85;
+      const x0=cx+Math.cos(ang)*ringR, y0=cy+Math.sin(ang)*ringR;
+      const x1=cx+Math.cos(ang)*(ringR+len), y1=cy+Math.sin(ang)*(ringR+len);
+      ctx.strokeStyle=`hsla(${hue+bins[b]*40},95%,72%,${0.12+bins[b]*0.55})`;
+      ctx.lineWidth=2.2*DPR; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
     }
 
-    // core orb
-    const core = ctx.createRadialGradient(cx - orbR*0.25, cy - orbR*0.3, orbR*0.05, cx, cy, orbR);
-    core.addColorStop(0, `hsla(${hue+20},100%,92%,.95)`);
-    core.addColorStop(0.45, `hsla(${hue},${sat}%,64%,.85)`);
-    core.addColorStop(1, `hsla(${hue-18},${sat}%,38%,0)`);
-    ctx.fillStyle = core;
-    ctx.beginPath(); ctx.arc(cx,cy,orbR,0,Math.PI*2); ctx.fill();
-
-    // breathing ring
-    ctx.strokeStyle = `hsla(${hue+10},90%,80%,${0.25+level*0.4})`;
-    ctx.lineWidth = 1.2*DPR;
-    ctx.beginPath(); ctx.arc(cx,cy,orbR*1.28 + Math.sin(t*3)*4*DPR,0,Math.PI*2); ctx.stroke();
+    // movement ripples
+    if(moveLevel>0.14 && frame%14===0) ripples.push({r:orbR*1.2, a:0.5*moveLevel+0.15});
+    for(let i=ripples.length-1;i>=0;i--){
+      const rp=ripples[i]; rp.r+=base*0.006; rp.a*=0.955;
+      if(rp.a<0.01){ ripples.splice(i,1); continue; }
+      ctx.strokeStyle=`hsla(${hue+15},90%,78%,${rp.a})`;
+      ctx.lineWidth=1.1*DPR;
+      ctx.beginPath(); ctx.arc(cx,cy,rp.r,0,Math.PI*2); ctx.stroke();
+    }
 
     // particles
     for(const p of P){
-      p.a += p.sp * (1 + level*1.6);
-      const rr = orbR * (p.r*2.1 + Math.sin(t*1.7 + p.ph)*p.wob*6);
-      const x = cx + Math.cos(p.a)*rr;
-      const y = cy + Math.sin(p.a)*rr*0.92;
-      const tw = 0.5 + 0.5*Math.sin(t*4 + p.ph);
-      ctx.fillStyle = `hsla(${hue + 26*Math.sin(p.ph)},95%,${70+tw*20}%,${(0.10+vibe*0.30)*tw})`;
+      p.a+=p.sp*(1+level*1.6+moveLevel*1.2);
+      const rr=orbR*(p.r*2.2+Math.sin(t*1.7+p.ph)*p.wob*6);
+      const x=cx+Math.cos(p.a)*rr, y=cy+Math.sin(p.a)*rr*0.92;
+      const tw=0.5+0.5*Math.sin(t*4+p.ph);
+      ctx.fillStyle=`hsla(${hue+26*Math.sin(p.ph)},95%,${70+tw*20}%,${(0.10+vibe*0.30)*tw})`;
       ctx.beginPath(); ctx.arc(x,y,p.sz*DPR*(0.8+level),0,Math.PI*2); ctx.fill();
     }
 
-    updateReadout();
+    drawMap();
+    if(frame%18===0) updateReadout();
   }
 
-  /* ================= READOUT ================= */
-  const words = [
-    [0.00,'heavy air'], [0.22,'finding the vibe…'], [0.38,'warming up'],
-    [0.50,'good energy'], [0.62,'really good vibes'], [0.74,'golden zone'], [0.86,'pure magic ✦']
-  ];
-  let lastWord = '';
-  let frameCount = 0;
+  /* ---------------- field map ---------------- */
+  function drawMap(){
+    if(!MW) return;
+    mctx.clearRect(0,0,MW,MH);
+    const hue=vibeHue(vibe);
+
+    // fit view
+    let minX=pos.x-4,maxX=pos.x+4,minY=pos.y-4,maxY=pos.y+4;
+    for(const p of trail){ minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);minY=Math.min(minY,p.y);maxY=Math.max(maxY,p.y); }
+    if(best.has){ minX=Math.min(minX,best.x);maxX=Math.max(maxX,best.x);minY=Math.min(minY,best.y);maxY=Math.max(maxY,best.y); }
+    const spanX=Math.max(maxX-minX,8), spanY=Math.max(maxY-minY,8);
+    const pad=42*DPR;
+    const scale=Math.min((MW-pad*2)/spanX,(MH-pad*2)/spanY);
+    const ox=MW/2-(minX+maxX)/2*scale, oy=MH/2-(minY+maxY)/2*scale;
+    const T=(p)=>[ox+p.x*scale, oy+p.y*scale];
+
+    // topographic contours — curvature field around golden zone + you
+    mctx.globalCompositeOperation='source-over';
+    const centers=[{p:pos,h:hue,k:0}]; if(best.has) centers.push({p:best,h:vibeHue(best.v),k:1});
+    for(const c of centers){
+      const [ccx,ccy]=T(c.p);
+      for(let ring=1;ring<=6;ring++){
+        const rBase=ring*(Math.min(MW,MH)*0.09);
+        mctx.beginPath();
+        for(let a=0;a<=64;a++){
+          const ang=a/64*Math.PI*2;
+          const n=Math.sin(ang*3+ring*1.7+t*(c.k?0.5:0.8))*0.10+Math.sin(ang*5-ring+t*0.6)*0.06;
+          const r=rBase*(1+n);
+          const x=ccx+Math.cos(ang)*r, y=ccy+Math.sin(ang)*r;
+          a===0? mctx.moveTo(x,y): mctx.lineTo(x,y);
+        }
+        mctx.closePath();
+        mctx.strokeStyle=`hsla(${c.h},70%,70%,${(c.k?0.10:0.07)*(1-ring/7)})`;
+        mctx.lineWidth=1*DPR;
+        mctx.stroke();
+      }
+    }
+
+    mctx.globalCompositeOperation='lighter';
+    // trail — your path, colored by the vibe you felt there
+    for(let i=1;i<trail.length;i++){
+      const a=trail[i-1], b=trail[i];
+      const [x0,y0]=T(a), [x1,y1]=T(b);
+      const h=vibeHue(b.vibe);
+      const age=i/trail.length;
+      mctx.strokeStyle=`hsla(${h},90%,66%,${0.12+age*0.5})`;
+      mctx.lineWidth=(1.6+b.vibe*2.4)*DPR; mctx.lineCap='round';
+      mctx.beginPath(); mctx.moveTo(x0,y0); mctx.lineTo(x1,y1); mctx.stroke();
+      // vibe beads
+      if(i%4===0){
+        mctx.fillStyle=`hsla(${h},95%,72%,${0.25+b.vibe*0.4})`;
+        mctx.beginPath(); mctx.arc(x1,y1,(1.5+b.vibe*2)*DPR,0,Math.PI*2); mctx.fill();
+      }
+    }
+    // golden zone marker
+    if(best.has && best.v>0.55){
+      const [bx,by]=T(best);
+      const pr=(6+Math.sin(t*3)*2)*DPR + gzPing*22*DPR; gzPing*=0.93;
+      mctx.strokeStyle=`hsla(46,100%,72%,${0.6})`;
+      mctx.lineWidth=1.4*DPR;
+      mctx.beginPath(); mctx.arc(bx,by,pr,0,Math.PI*2); mctx.stroke();
+      mctx.fillStyle='hsla(46,100%,80%,.9)';
+      mctx.beginPath(); mctx.arc(bx,by,2.6*DPR,0,Math.PI*2); mctx.fill();
+    }
+    // you — pulsing dot + heading tick
+    const [px,py]=T(pos);
+    const g=mctx.createRadialGradient(px,py,0,px,py,14*DPR);
+    g.addColorStop(0,`hsla(${hue},95%,75%,.9)`); g.addColorStop(1,'hsla(0,0%,0%,0)');
+    mctx.fillStyle=g; mctx.beginPath(); mctx.arc(px,py,14*DPR,0,Math.PI*2); mctx.fill();
+    mctx.fillStyle='#fff';
+    mctx.beginPath(); mctx.arc(px,py,3*DPR,0,Math.PI*2); mctx.fill();
+    mctx.strokeStyle='rgba(255,255,255,.7)'; mctx.lineWidth=1.5*DPR;
+    mctx.beginPath(); mctx.moveTo(px,py);
+    mctx.lineTo(px+Math.sin(heading)*10*DPR, py-Math.cos(heading)*10*DPR); mctx.stroke();
+
+    // labels
+    if(frame%30===0){
+      coordsEl.textContent = lastLL
+        ? `${lastLL.lat.toFixed(5)}, ${lastLL.lng.toFixed(5)} · ±${Math.round(lastLL.accuracy)}m`
+        : 'locating…';
+      scaleEl.textContent = `${Math.round(60*DPR/scale)} m ——`;
+    }
+  }
+
+  /* ---------------- readout ---------------- */
+  const words=[[0,'heavy air'],[0.22,'finding the vibe…'],[0.38,'warming up'],
+    [0.50,'good energy'],[0.62,'really good vibes'],[0.74,'golden zone'],[0.86,'pure magic ✦']];
+  const vWords=[[0,'tense vibe'],[0.35,'neutral vibe'],[0.5,'warm vibe'],[0.65,'great vibe'],[0.8,'radiant ✦']];
+  let lastWord='';
   function updateReadout(){
     if(!running) return;
-    if(++frameCount % 20 !== 0) return;
-    let w = words[0][1];
-    for(const [th,label] of words) if(vibe >= th) w = label;
-    if(w !== lastWord){ lastWord = w; vibeWordEl.textContent = w; }
-    vibeScoreEl.textContent = Math.round(vibe*100) + ' · vibe';
+    let w=words[0][1]; for(const [th,l] of words) if(vibe>=th) w=l;
+    if(w!==lastWord){ lastWord=w; vibeWordEl.textContent=w; }
+    vibeScoreEl.textContent=Math.round(vibe*100)+' · vibe';
+    moveTag.style.opacity = moveLevel>0.14 ? 1 : 0;
+
+    if(voiceConf>0.5){
+      voiceChip.classList.add('on');
+      let vw=vWords[0][1]; for(const [th,l] of vWords) if(voiceVibe>=th) vw=l;
+      const vh=vibeHue(voiceVibe);
+      vcIcon.style.color=`hsl(${vh},90%,72%)`;
+      vcLabel.textContent='VOICE · '+Math.round(voiceVibe*100);
+      vcSub.textContent=vw+(voicePitch?` · ${Math.round(voicePitch)} hz`:'');
+    } else if(voiceConf<0.25){
+      voiceChip.classList.remove('on');
+    }
   }
 
-  /* ================= START ================= */
-  startBtn.addEventListener('click', async () => {
-    try {
+  /* ---------------- start ---------------- */
+  document.getElementById('startBtn').addEventListener('click', async ()=>{
+    // motion + orientation permission must be inside the tap on iOS
+    try{ if(window.DeviceMotionEvent?.requestPermission){ await DeviceMotionEvent.requestPermission(); } }catch(e){}
+    try{ if(window.DeviceOrientationEvent?.requestPermission){ await DeviceOrientationEvent.requestPermission(); } }catch(e){}
+    addEventListener('devicemotion', onMotion);
+    addEventListener('deviceorientation', onOrient);
+    try{
       await startAudio();
-      startOverlay.classList.add('hidden');
-      readout.style.opacity = 1;
-    } catch(e){
-      errEl.style.display = 'block';
-      errEl.textContent = 'Microphone blocked. Allow mic access in your browser settings, then reload. (In-app browsers sometimes block the mic — try opening in Safari or Chrome.)';
+      startGeo();
+      document.getElementById('startOverlay').classList.add('hidden');
+      readout.style.opacity=1;
+      mapCard.classList.add('on');
+      setTimeout(resize,120);
+    }catch(e){
+      errEl.style.display='block';
+      errEl.textContent='Microphone blocked. Allow mic access for this site in Safari (aA menu → Website Settings) then reload.';
     }
   });
 
-  draw();
+  resize();
+  requestAnimationFrame(draw);
 })();
 </script>
 </body>
