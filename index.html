@@ -100,6 +100,9 @@
     cursor:pointer; line-height:1;
   }
   #zoomCtl button:active { transform:scale(.92); }
+  #zoomLabel {
+    text-align:center; font-size:8px; letter-spacing:.12em; opacity:.5; text-transform:uppercase;
+  }
 
   #startOverlay {
     position:fixed; inset:0; z-index:5; display:flex; flex-direction:column;
@@ -139,7 +142,7 @@
 <canvas id="stage"></canvas>
 
 <div id="ui">
-  <div class="brand">A U R A · field five</div>
+  <div class="brand">A U R A · field six</div>
   <div id="readout">
     <div id="vibeWord">listening…</div>
     <div id="vibeScore">— vibe</div>
@@ -160,7 +163,11 @@
 <div id="mapCard">
   <div id="mapHead"><span>Field map · cosmic layer</span><span id="gzTag">✦ golden zone</span></div>
   <canvas id="mapCanvas"></canvas>
-  <div id="zoomCtl"><button id="zin">+</button><button id="zout">−</button></div>
+  <div id="zoomCtl">
+    <button id="zin">+</button>
+    <button id="zout">−</button>
+    <div id="zoomLabel">room</div>
+  </div>
   <div id="cosmosLine">☾ reading the sky…</div>
   <div id="coords">—</div>
   <div id="scaleBar">5 m —</div>
@@ -168,7 +175,7 @@
 
 <div id="startOverlay">
   <div class="ovTitle">AURA</div>
-  <div class="ovSub">A living mood ring for the room you're in. It feels the emotional texture of sound, paints the real streets and buildings around you with the energy you find there, and hangs the moon and planets over your position.</div>
+  <div class="ovSub">A living mood ring for the world around you. It forecasts the energy of every street and building before you arrive, refines the picture as you explore, reads the tone of every voice, and hangs the sun, moon and planets over your position.</div>
   <button id="startBtn">Begin listening</button>
   <div class="ovNote">Uses mic, motion + location — live only, nothing recorded. Your coordinates go only to the open map server to draw your surroundings. Allow all three permissions.</div>
 </div>
@@ -195,6 +202,7 @@
   const voiceChip=$('voiceChip'), vcLabel=$('vcLabel'), vcSub=$('vcSub'), vcIcon=$('vcIcon');
   const peopleEl=$('people'), mapCard=$('mapCard'), gzTag=$('gzTag');
   const coordsEl=$('coords'), cosmosLine=$('cosmosLine'), scaleEl=$('scaleBar'), errEl=$('err');
+  const zoomLabel=$('zoomLabel');
 
   /* ================= audio ================= */
   let audioCtx,analyser,freqData,timeData,running=false;
@@ -397,40 +405,72 @@
     }
   }
 
-  /* ================= vibe field — energy painted onto the city =================
-     Every trail sample is a deposit of measured vibe. The field at any point is
-     the distance-weighted blend of nearby deposits (gaussian falloff, ~16m).
-     Buildings and roads take their color from the field where they stand;
-     planetary tide sways the whole palette a few degrees. */
-  const SIGMA2=2*16*16;
-  function fieldAt(x,y){
+  /* ============ vibe field: FORECAST + MEASUREMENT ============
+     Every structure gets an energy forecast the moment the map loads,
+     built from real environmental data:
+       + gathering places (cafes, gardens, venues, community spaces)
+       + nearness to parks, gardens and water (biophilic lift)
+       − nearness to heavy roads (noise burden)
+       + the sky right now: golden hour, moon, planetary alignment
+     As you actually walk and measure, real readings blend in and
+     override the forecast — the map sharpens with every step. */
+  const SIGMA2=2*16*16, SIGTIGHT2=2*5.5*5.5;
+  function fieldAt(x,y,tight){
+    const s2=tight?SIGTIGHT2:SIGMA2;
     let wsum=0,vsum=0;
     for(const s of trail){
       const dx=x-s.x, dy=y-s.y;
       const d2=dx*dx+dy*dy;
-      if(d2>4000) continue;
-      const w=Math.exp(-d2/SIGMA2);
+      if(d2>(tight?900:4000)) continue;
+      const w=Math.exp(-d2/s2);
       wsum+=w; vsum+=w*s.vibe;
     }
-    return wsum>0.04 ? vsum/wsum : null;
+    return wsum>(tight?0.02:0.04) ? {v:vsum/wsum, conf:Math.min(1,wsum)} : null;
   }
-  let tintDirty=true, tintFrame=0;
+  function forecastAt(x,y){
+    let f=0.44;
+    for(const a of osm.amenities){
+      const d2=(x-a.x)*(x-a.x)+(y-a.y)*(y-a.y);
+      f+=a.warm*Math.exp(-d2/(2*42*42));
+    }
+    for(const rd of osm.roads){
+      if(rd.w<2.5) continue;
+      const d2=(x-rd.mx)*(x-rd.mx)+(y-rd.my)*(y-rd.my);
+      f-=0.16*Math.exp(-d2/(2*30*30));
+    }
+    for(const pk of osm.parkPts){
+      const d2=(x-pk.x)*(x-pk.x)+(y-pk.y)*(y-pk.y);
+      f+=0.10*Math.exp(-d2/(2*55*55));
+    }
+    return Math.min(0.9,Math.max(0.12,f));
+  }
+  function blended(x,y,pred){
+    const m=fieldAt(x,y,false);
+    const skyOff=(cosmos? (cosmos.tide-0.5)*0.10 : 0) + goldenLift;
+    const p=Math.min(0.92,Math.max(0.1,(pred!==undefined?pred:forecastAt(x,y))+skyOff));
+    if(!m) return {v:p, conf:0};
+    return {v:p*(1-m.conf)+m.v*m.conf, conf:m.conf};
+  }
+  let tintDirty=true;
   function updateTints(){
-    for(const b of osm.buildings){ b.f=fieldAt(b.cx,b.cy); }
-    for(const r of osm.roads){ r.f=fieldAt(r.mx,r.my); }
+    for(const b of osm.buildings){ const r=blended(b.cx,b.cy,b.pred); b.f=r.v; b.conf=r.conf; }
+    for(const r of osm.roads){ const q=blended(r.mx,r.my,r.pred); r.f=q.v; r.conf=q.conf; }
   }
 
   /* ================= structures — real city from OSM ================= */
-  const osm={buildings:[],roads:[],water:[],parks:[],center:null,fetching:false,radius:320};
+  const osm={buildings:[],roads:[],water:[],parks:[],amenities:[],parkPts:[],center:null,fetching:false,radius:320};
   const OVERPASS=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'];
+  const WARM_AMENITY={cafe:.30,restaurant:.24,bar:.22,pub:.22,library:.20,community_centre:.22,place_of_worship:.16,theatre:.20,arts_centre:.22,ice_cream:.26,marketplace:.22};
   async function fetchOSM(lat,lng,rad){
     osm.fetching=true;
+    const bRad=Math.min(rad,480);
     const q=`[out:json][timeout:25];(
-      way["building"](around:${rad},${lat},${lng});
+      way["building"](around:${bRad},${lat},${lng});
       way["highway"](around:${rad},${lat},${lng});
       way["natural"="water"](around:${rad+80},${lat},${lng});
       way["waterway"="river"](around:${rad+80},${lat},${lng});
       way["leisure"~"park|garden"](around:${rad+80},${lat},${lng});
+      node["amenity"~"cafe|restaurant|bar|pub|library|community_centre|place_of_worship|theatre|arts_centre|ice_cream|marketplace"](around:${rad},${lat},${lng});
     );out geom;`;
     for(const ep of OVERPASS){
       try{
@@ -438,24 +478,36 @@
           headers:{'Content-Type':'application/x-www-form-urlencoded'}});
         if(!res.ok) continue;
         const data=await res.json();
-        osm.buildings=[]; osm.roads=[]; osm.water=[]; osm.parks=[];
+        osm.buildings=[]; osm.roads=[]; osm.water=[]; osm.parks=[]; osm.amenities=[]; osm.parkPts=[];
         for(const el of (data.elements||[])){
+          const tg=el.tags||{};
+          if(el.type==='node'&&tg.amenity){
+            const p=ll2xy(el.lat,el.lon);
+            osm.amenities.push({x:p.x,y:p.y,warm:WARM_AMENITY[tg.amenity]||0.15});
+            continue;
+          }
           if(!el.geometry) continue;
           const pts=el.geometry.map(g=>ll2xy(g.lat,g.lon));
-          const tg=el.tags||{};
           if(tg.building){
             let cx=0,cy=0; for(const p of pts){cx+=p.x;cy+=p.y;}
-            osm.buildings.push({pts,cx:cx/pts.length,cy:cy/pts.length,f:null});
+            osm.buildings.push({pts,cx:cx/pts.length,cy:cy/pts.length,f:null,conf:0,seed:osm.buildings.length});
           }
           else if(tg.highway){
             const major=/motorway|trunk|primary|secondary|tertiary/.test(tg.highway);
             const minor=/residential|service|unclassified|living_street/.test(tg.highway);
             const mid=pts[Math.floor(pts.length/2)];
-            osm.roads.push({pts, w: major?2.6: minor?1.7:1.0, foot:!major&&!minor, mx:mid.x, my:mid.y, f:null});
+            osm.roads.push({pts, w: major?2.6: minor?1.7:1.0, foot:!major&&!minor, mx:mid.x, my:mid.y, f:null, conf:0});
           }
           else if(tg.natural==='water'||tg.waterway) osm.water.push({pts,line:!!tg.waterway});
-          else if(tg.leisure) osm.parks.push({pts});
+          else if(tg.leisure){
+            osm.parks.push({pts});
+            let cx=0,cy=0; for(const p of pts){cx+=p.x;cy+=p.y;}
+            osm.parkPts.push({x:cx/pts.length,y:cy/pts.length});
+          }
         }
+        // bake static forecast per structure
+        for(const b of osm.buildings) b.pred=forecastAt(b.cx,b.cy);
+        for(const r of osm.roads) r.pred=forecastAt(r.mx,r.my);
         osm.center={...ll2xy(lat,lng)};
         tintDirty=true;
         break;
@@ -465,7 +517,7 @@
   }
 
   /* ================= cosmos — real ephemeris ================= */
-  let cosmos=null, cosmicMod=0, cosmicHueShift=0;
+  let cosmos=null, cosmicMod=0, cosmicHueShift=0, goldenLift=0;
   const RAD=Math.PI/180;
   const rev=x=>{x%=360;return x<0?x+360:x;};
   function bodyPos(el,d,sun){
@@ -502,6 +554,8 @@
     const vsun=Math.atan2(yvs,xvs), rs=Math.hypot(xvs,yvs);
     const Lsun=rev((vsun/RAD)+ws);
     const sun={x:rs*Math.cos(Lsun*RAD), y:rs*Math.sin(Lsun*RAD), z:0};
+    const sunAA=altAz(sun.x,sun.y,0,d,lat,lng,Lsun);
+    goldenLift = (sunAA.alt>-5&&sunAA.alt<13)?0.05:0;   // golden hour, computed for real
     const els={
       Moon:{N:125.1228-0.0529538083*d,i:5.1454,w:318.0634+0.1643573223*d,a:60.2666,e:0.0549,M:115.3654+13.0649929509*d,geo:1,sym:'☾'},
       Mercury:{N:48.3313+3.24587e-5*d,i:7.0047,w:29.1241+1.01444e-5*d,a:0.387098,e:0.205635,M:168.6562+4.0923344368*d,sym:'☿'},
@@ -510,8 +564,8 @@
       Jupiter:{N:100.4542+2.76854e-5*d,i:1.3030,w:273.8777+1.64505e-5*d,a:5.20256,e:0.048498,M:19.8950+0.0830853001*d,sym:'♃'},
       Saturn:{N:113.6634+2.3898e-5*d,i:2.4886,w:339.3939+2.97661e-5*d,a:9.55475,e:0.055546,M:316.9670+0.0334442282*d,sym:'♄'}
     };
-    const bodies=[]; let moonLon=0;
-    const planetLons=[];
+    const bodies=[{name:'Sun',sym:'☉',alt:sunAA.alt,az:sunAA.az}];
+    let moonLon=0; const planetLons=[];
     for(const [name,el] of Object.entries(els)){
       const p=bodyPos(el,d, el.geo?null:sun);
       const aa=altAz(p.x,p.y,p.z,d,lat,lng,Lsun);
@@ -522,9 +576,7 @@
     const ill=(1-Math.cos(elong*RAD))/2;
     const phases=['new moon','waxing crescent','first quarter','waxing gibbous','full moon','waning gibbous','last quarter','waning crescent'];
     const phaseName=phases[Math.floor(rev(elong+22.5)/45)%8];
-    const planetsUp=bodies.filter(b=>b.name!=='Moon'&&b.alt>0).length;
-    /* alignment: how tightly clustered the planets sit along the ecliptic —
-       a real geometric measure of planetary alignment (0 scattered, 1 tight) */
+    const planetsUp=bodies.filter(b=>b.name!=='Moon'&&b.name!=='Sun'&&b.alt>0).length;
     let ax=0,ay=0;
     for(const L of planetLons){ ax+=Math.cos(L*RAD); ay+=Math.sin(L*RAD); }
     const alignment=Math.hypot(ax,ay)/planetLons.length;
@@ -532,7 +584,8 @@
     cosmicMod=(tide-0.5)*0.06;
     cosmicHueShift=(tide-0.5)*16;
     cosmos={bodies,ill,phaseName,planetsUp,tide,alignment};
-    cosmosLine.textContent=`☾ ${phaseName} ${Math.round(ill*100)}% · ${planetsUp} planets up · alignment ${Math.round(alignment*100)} · tide ${Math.round(tide*100)}`;
+    cosmosLine.textContent=`☾ ${phaseName} ${Math.round(ill*100)}% · ${planetsUp} planets up · alignment ${Math.round(alignment*100)} · tide ${Math.round(tide*100)}${goldenLift?' · golden hour ☉':''}`;
+    tintDirty=true;
   }
 
   /* ================= visuals ================= */
@@ -610,8 +663,8 @@
     if(frame%3600===1) computeCosmos();
   }
 
-  /* ================= zoom ================= */
-  let userZoom=1, pinchD=0;
+  /* ================= zoom — centered on you ================= */
+  let span=70, pinchD=0;   // meters visible across the map width
   mapCanvas.addEventListener('touchstart',e=>{
     if(e.touches.length===2){
       pinchD=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
@@ -620,18 +673,21 @@
   mapCanvas.addEventListener('touchmove',e=>{
     if(e.touches.length===2&&pinchD>0){
       const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-      userZoom=Math.min(5,Math.max(0.22,userZoom*(d/pinchD)));
-      pinchD=d;
-      maybeExpand();
+      span=Math.min(2600,Math.max(6,span*(pinchD/d)));
+      pinchD=d; maybeExpand();
     }
     e.preventDefault();
   },{passive:false});
   mapCanvas.addEventListener('touchend',()=>{pinchD=0;});
-  $('zin').addEventListener('click',()=>{userZoom=Math.min(5,userZoom*1.4);});
-  $('zout').addEventListener('click',()=>{userZoom=Math.max(0.22,userZoom/1.4);maybeExpand();});
+  $('zin').addEventListener('click',()=>{span=Math.max(6,span*0.55);setZoomLabel();});
+  $('zout').addEventListener('click',()=>{span=Math.min(2600,span*1.82);maybeExpand();setZoomLabel();});
+  function setZoomLabel(){
+    zoomLabel.textContent = span<=16?'room': span<=90?'block': span<=500?'area':'district';
+  }
   function maybeExpand(){
-    if(userZoom<0.6 && osm.radius<700 && lastLL && !osm.fetching){
-      osm.radius=700; fetchOSM(lastLL.lat,lastLL.lng,700);
+    setZoomLabel();
+    if(span>420 && osm.radius<1300 && lastLL && !osm.fetching){
+      osm.radius=1300; fetchOSM(lastLL.lat,lastLL.lng,1300);
     }
   }
 
@@ -654,33 +710,27 @@
     if(!MW) return;
     mctx.clearRect(0,0,MW,MH);
     const hue=vibeHue(vibe);
-    const glow=0.75+moveLevel*0.7;                    // speed feeds the light
+    const glow=0.75+moveLevel*0.7;
+    const scale=MW/span;                                  // centered on YOU
+    const T=p=>[MW/2+(p.x-pos.x)*scale, MH/2+(p.y-pos.y)*scale];
+    const roomMode = span<=18;
 
-    let minX=pos.x-4,maxX=pos.x+4,minY=pos.y-4,maxY=pos.y+4;
-    for(const p of trail){minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);minY=Math.min(minY,p.y);maxY=Math.max(maxY,p.y);}
-    if(best.has){minX=Math.min(minX,best.x);maxX=Math.max(maxX,best.x);minY=Math.min(minY,best.y);maxY=Math.max(maxY,best.y);}
-    const spanX=Math.max(maxX-minX,14),spanY=Math.max(maxY-minY,14);
-    const pad=46*DPR;
-    const scale=Math.min((MW-pad*2)/spanX,(MH-pad*2)/spanY)*userZoom;
-    const ox=MW/2-(minX+maxX)/2*scale, oy=MH/2-(minY+maxY)/2*scale;
-    const T=p=>[ox+p.x*scale,oy+p.y*scale];
-
-    /* vibe pockets — soft pools of deposited energy, visible when zoomed out */
+    /* vibe pools — measured deposits; consolidate into pockets as you zoom out */
     mctx.globalCompositeOperation='source-over';
-    for(let i=0;i<trail.length;i+=3){
+    const poolR=Math.max(9*DPR, Math.min(70*DPR, 17*scale));
+    for(let i=0;i<trail.length;i+=(span>300?2:3)){
       const s=trail[i];
       const [x,y]=T(s);
-      if(x<-80||x>MW+80||y<-80||y>MH+80) continue;
-      const r=Math.max(10*DPR, 17*scale);
+      if(x<-90||x>MW+90||y<-90||y>MH+90) continue;
       const h=vibeHue(s.vibe);
-      const g=mctx.createRadialGradient(x,y,0,x,y,r);
-      g.addColorStop(0,`hsla(${h},85%,58%,${(0.028+s.vibe*0.05)*glow})`);
+      const g=mctx.createRadialGradient(x,y,0,x,y,poolR);
+      g.addColorStop(0,`hsla(${h},85%,58%,${(0.03+s.vibe*0.05)*glow*(span>300?1.5:1)})`);
       g.addColorStop(1,'hsla(0,0%,0%,0)');
       mctx.fillStyle=g;
-      mctx.beginPath(); mctx.arc(x,y,r,0,Math.PI*2); mctx.fill();
+      mctx.beginPath(); mctx.arc(x,y,poolR,0,Math.PI*2); mctx.fill();
     }
 
-    /* --- the real city, lit by the field --- */
+    /* the real city, colored by forecast + measurement */
     for(const pk of osm.parks){
       if(!inView(pk.pts,T)) continue;
       pathOf(pk.pts,T); mctx.closePath();
@@ -698,34 +748,70 @@
     for(const rd of osm.roads){
       if(!inView(rd.pts,T)) continue;
       pathOf(rd.pts,T);
-      const lit=rd.f!==null;
-      const h=lit?vibeHue(rd.f):258;
-      const bright=lit? 0.20+rd.f*0.30 : (rd.foot?0.14:0.17);
+      const h=vibeHue(rd.f===null?0.44:rd.f);
+      const strength=(rd.f===null?0.4:rd.f);
+      const solid=rd.conf>0.15;
+      const bright=(0.13+strength*0.26)*(solid?1.25:0.85);
       if(rd.foot){
         mctx.setLineDash([3*DPR,4*DPR]);
-        mctx.strokeStyle=`hsla(${h},${lit?85:45}%,72%,${bright*glow})`; mctx.lineWidth=1*DPR;
+        mctx.strokeStyle=`hsla(${h},80%,72%,${bright*glow})`; mctx.lineWidth=1*DPR;
       } else {
         mctx.setLineDash([]);
-        mctx.strokeStyle=`hsla(${h},${lit?85:50}%,74%,${bright*glow})`;
-        mctx.lineWidth=rd.w*DPR*(lit?1.25:1);
+        mctx.strokeStyle=`hsla(${h},80%,74%,${bright*glow})`;
+        mctx.lineWidth=rd.w*DPR*(solid?1.25:1);
       }
       mctx.lineCap='round'; mctx.lineJoin='round'; mctx.stroke();
       mctx.setLineDash([]);
     }
     for(const bd of osm.buildings){
       if(!inView(bd.pts,T)) continue;
+      const f=bd.f===null?0.44:bd.f;
+      const h=vibeHue(f);
+      const solid=bd.conf>0.15;
       pathOf(bd.pts,T); mctx.closePath();
-      const lit=bd.f!==null;
-      const h=lit?vibeHue(bd.f):252;
-      mctx.fillStyle=lit
-        ? `hsla(${h},70%,58%,${(0.05+bd.f*0.11)*glow})`
-        : 'hsla(252,40%,60%,.055)';
+      mctx.fillStyle=`hsla(${h},70%,58%,${(0.045+f*0.10)*(solid?1.3:0.8)*glow})`;
       mctx.fill();
-      mctx.strokeStyle=lit
-        ? `hsla(${h},90%,76%,${(0.24+bd.f*0.38)*glow})`
-        : 'hsla(252,65%,78%,.26)';
-      mctx.lineWidth=(lit?1.15:0.9)*DPR; mctx.lineJoin='miter';
+      mctx.strokeStyle=`hsla(${h},88%,76%,${(0.20+f*0.34)*(solid?1.25:0.8)*glow})`;
+      mctx.lineWidth=(solid?1.15:0.9)*DPR; mctx.lineJoin='miter';
       mctx.stroke();
+
+      /* room mode: step inside — chambers sketched, lit by what you measure */
+      if(roomMode){
+        mctx.save();
+        pathOf(bd.pts,T); mctx.closePath(); mctx.clip();
+        let bx0=1e9,by0=1e9,bx1=-1e9,by1=-1e9;
+        for(const p of bd.pts){bx0=Math.min(bx0,p.x);by0=Math.min(by0,p.y);bx1=Math.max(bx1,p.x);by1=Math.max(by1,p.y);}
+        const cell=3.4;
+        for(let gx=Math.floor(bx0/cell)*cell; gx<bx1; gx+=cell){
+          for(let gy=Math.floor(by0/cell)*cell; gy<by1; gy+=cell){
+            const jit=((bd.seed*73+Math.round(gx*7)+Math.round(gy*13))%17)/17;
+            const ccx=gx+cell/2+(jit-0.5)*0.8, ccy=gy+cell/2+(jit-0.5)*0.8;
+            const m=fieldAt(ccx,ccy,true);
+            const cv=m?m.v:f;
+            const ch=vibeHue(cv);
+            const [sx,sy]=T({x:gx,y:gy});
+            const cs=cell*scale;
+            mctx.fillStyle=`hsla(${ch},75%,55%,${m?0.10+cv*0.16:0.03})`;
+            mctx.fillRect(sx,sy,cs,cs);
+            mctx.strokeStyle=`hsla(${ch},60%,75%,${0.06+(jit*0.05)})`;
+            mctx.lineWidth=0.7*DPR;
+            mctx.strokeRect(sx,sy,cs,cs);
+          }
+        }
+        mctx.restore();
+      }
+    }
+    /* gathering places — the forecast made visible */
+    if(span<300){
+      for(const a of osm.amenities){
+        const [x,y]=T(a);
+        if(x<-20||x>MW+20||y<-20||y>MH+20) continue;
+        const g=mctx.createRadialGradient(x,y,0,x,y,8*DPR);
+        g.addColorStop(0,`hsla(46,95%,70%,${0.28+a.warm*0.8})`);
+        g.addColorStop(1,'hsla(0,0%,0%,0)');
+        mctx.fillStyle=g;
+        mctx.beginPath(); mctx.arc(x,y,8*DPR,0,Math.PI*2); mctx.fill();
+      }
     }
 
     /* cosmic compass ring */
@@ -742,12 +828,12 @@
       for(const b of cosmos.bodies){
         const a=(b.az-90)*RAD, up=b.alt>0;
         const x=rcx+Math.cos(a)*cr, y=rcy+Math.sin(a)*cr;
-        const isMoon=b.name==='Moon';
-        mctx.font=`${(isMoon?13:10.5)*DPR}px serif`;
+        const isMoon=b.name==='Moon', isSun=b.name==='Sun';
+        mctx.font=`${(isMoon||isSun?13:10.5)*DPR}px serif`;
         mctx.fillStyle=up
-          ? (isMoon?'rgba(240,235,255,.95)':`hsla(${52+b.az%40},80%,78%,.85)`)
+          ? (isMoon?'rgba(240,235,255,.95)': isSun?'rgba(255,225,150,.95)':`hsla(${52+b.az%40},80%,78%,.85)`)
           : 'rgba(200,195,230,.18)';
-        if(up&&isMoon){ mctx.shadowColor='rgba(220,210,255,.8)'; mctx.shadowBlur=8*DPR; }
+        if(up&&(isMoon||isSun)){ mctx.shadowColor=isSun?'rgba(255,215,120,.9)':'rgba(220,210,255,.8)'; mctx.shadowBlur=8*DPR; }
         mctx.fillText(b.sym,x,y);
         mctx.shadowBlur=0;
       }
@@ -777,6 +863,7 @@
     for(let i=1;i<trail.length;i++){
       const a=trail[i-1],b=trail[i];
       const [x0,y0]=T(a),[x1,y1]=T(b);
+      if((x0<-60&&x1<-60)||(x0>MW+60&&x1>MW+60)||(y0<-60&&y1<-60)||(y0>MH+60&&y1>MH+60)) continue;
       const h=vibeHue(b.vibe), age=i/trail.length;
       mctx.strokeStyle=`hsla(${h},90%,66%,${(0.12+age*0.5)*glow})`;
       mctx.lineWidth=(1.6+b.vibe*2.4)*DPR; mctx.lineCap='round';
@@ -807,7 +894,7 @@
       coordsEl.textContent=lastLL
         ?`${lastLL.lat.toFixed(5)}, ${lastLL.lng.toFixed(5)} · ±${Math.round(lastLL.accuracy)}m${osm.fetching?' · mapping…':''}`
         :'locating…';
-      scaleEl.textContent=`${Math.round(60*DPR/scale)} m ——`;
+      scaleEl.textContent=`${Math.round(span/6)} m ——`;
     }
   }
 
