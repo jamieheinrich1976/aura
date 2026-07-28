@@ -16,22 +16,20 @@
   #ui {
     position:fixed; inset:0; z-index:2; pointer-events:none;
     display:flex; flex-direction:column; align-items:center;
-    padding-top:calc(env(safe-area-inset-top,0px) + 22px);
+    padding-top:calc(env(safe-area-inset-top,0px) + 20px);
   }
   .brand { letter-spacing:.55em; text-indent:.55em; font-size:11px; font-weight:300; text-transform:uppercase; opacity:.7; }
-
-  #readout { text-align:center; margin-top:8px; opacity:0; transition:opacity 1s ease; }
+  #readout { text-align:center; margin-top:6px; opacity:0; transition:opacity 1s ease; }
   #vibeWord {
-    font-family:'Fraunces', Georgia, serif; font-weight:300; font-size:34px; line-height:1.05; min-height:40px;
+    font-family:'Fraunces', Georgia, serif; font-weight:300; font-size:31px; line-height:1.05; min-height:36px;
     background:linear-gradient(120deg,#cfc6ff,#fff8e6,#ffd9a0);
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
-  #vibeScore { margin-top:6px; font-size:12px; letter-spacing:.35em; text-indent:.35em; text-transform:uppercase; opacity:.65; font-weight:300; }
-  #moveTag { margin-top:5px; font-size:11px; letter-spacing:.14em; opacity:0; font-weight:300; color:#bfe9ff; transition:opacity .4s; }
+  #vibeScore { margin-top:5px; font-size:11.5px; letter-spacing:.35em; text-indent:.35em; text-transform:uppercase; opacity:.65; font-weight:300; }
+  #moveTag { margin-top:4px; font-size:10.5px; letter-spacing:.14em; opacity:0; font-weight:300; color:#bfe9ff; transition:opacity .4s; }
 
-  /* voice chip */
   #voiceChip {
-    position:fixed; top:calc(env(safe-area-inset-top,0px) + 86px); right:16px; z-index:3;
+    position:fixed; top:calc(env(safe-area-inset-top,0px) + 78px); right:14px; z-index:3;
     display:flex; align-items:center; gap:9px;
     padding:9px 13px 9px 10px; border-radius:999px;
     background:rgba(18,14,34,.55); border:1px solid rgba(255,255,255,.14);
@@ -45,35 +43,29 @@
   #voiceChip .vc b { font-size:11px; font-weight:500; letter-spacing:.12em; }
   #voiceChip .vc span { font-size:10px; opacity:.65; letter-spacing:.08em; }
 
-  /* anonymous people + celestial context */
-  #peoplePanel, #cosmicChip {
-    position:fixed; z-index:3; pointer-events:none;
-    background:rgba(18,14,34,.55); border:1px solid rgba(255,255,255,.12);
+  #people {
+    position:fixed; left:12px; right:12px; z-index:2;
+    bottom:calc(env(safe-area-inset-bottom,0px) + 12px + 36vh + 10px);
+    display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; pointer-events:none;
+  }
+  #people::-webkit-scrollbar{ display:none; }
+  .pChip {
+    flex:0 0 auto; display:flex; align-items:center; gap:7px;
+    padding:7px 12px 7px 9px; border-radius:999px;
+    background:rgba(18,14,34,.5); border:1px solid rgba(255,255,255,.13);
     backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-    opacity:0; transform:translateY(-5px); transition:all .5s ease;
+    animation:chipIn .5s cubic-bezier(.2,.9,.3,1.25);
   }
-  #peoplePanel.on, #cosmicChip.on { opacity:1; transform:none; }
-  #peoplePanel {
-    top:calc(env(safe-area-inset-top,0px) + 86px); left:12px;
-    min-width:138px; max-width:48vw; border-radius:16px; padding:10px 12px;
-  }
-  .panelKicker { font-size:8px; letter-spacing:.18em; text-transform:uppercase; opacity:.48; margin-bottom:6px; }
-  .personRow { display:flex; justify-content:space-between; gap:12px; font-size:10px; line-height:1.55; }
-  .personRow b { font-weight:500; letter-spacing:.08em; }
-  .personRow span { opacity:.68; white-space:nowrap; }
-  #cosmicChip {
-    top:calc(env(safe-area-inset-top,0px) + 138px); right:12px;
-    border-radius:16px; padding:9px 11px; max-width:52vw; text-align:right;
-  }
-  #moonText { font-size:10px; letter-spacing:.08em; }
-  #planetText { margin-top:4px; font-size:9px; letter-spacing:.12em; opacity:.58; }
-  #cosmicNote { margin-top:3px; font-size:7px; letter-spacing:.08em; opacity:.32; }
+  @keyframes chipIn { from{opacity:0; transform:translateY(8px) scale(.9);} }
+  .pChip svg { width:15px; height:15px; }
+  .pChip .pt { font-size:10.5px; letter-spacing:.06em; white-space:nowrap; }
+  .pChip .pt b { font-weight:500; }
+  .pChip .pt span { opacity:.6; }
 
-  /* field map card */
   #mapCard {
     position:fixed; left:12px; right:12px; z-index:2;
     bottom:calc(env(safe-area-inset-bottom,0px) + 12px);
-    height:34vh; min-height:210px; max-height:300px;
+    height:36vh; min-height:230px; max-height:330px;
     border-radius:22px; overflow:hidden;
     background:rgba(12,9,24,.5); border:1px solid rgba(255,255,255,.12);
     backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
@@ -83,19 +75,19 @@
   #mapHead {
     position:absolute; top:0; left:0; right:0; z-index:2;
     display:flex; justify-content:space-between; align-items:center;
-    padding:11px 15px; font-size:10px; letter-spacing:.3em; text-transform:uppercase; opacity:.75;
+    padding:11px 15px; font-size:9.5px; letter-spacing:.28em; text-transform:uppercase; opacity:.75;
   }
-  #gzTag { letter-spacing:.1em; text-transform:none; color:#ffd98f; opacity:0; transition:opacity .5s; }
+  #gzTag { letter-spacing:.08em; text-transform:none; color:#ffd98f; opacity:0; transition:opacity .5s; }
   #gzTag.on { opacity:1; }
   #mapCanvas { position:absolute; inset:0; width:100%; height:100%; }
-  #coords {
-    position:absolute; bottom:9px; left:15px; z-index:2;
-    font-size:9px; letter-spacing:.12em; opacity:.45; font-variant-numeric:tabular-nums;
+  #coords, #cosmosLine {
+    position:absolute; left:15px; z-index:2;
+    font-size:9px; letter-spacing:.1em; opacity:.5; font-variant-numeric:tabular-nums;
   }
+  #cosmosLine { bottom:22px; color:#e8dcff; opacity:.7; }
+  #coords { bottom:9px; }
   #scaleBar { position:absolute; bottom:9px; right:15px; z-index:2; font-size:9px; letter-spacing:.12em; opacity:.45; }
-  #mapSource { position:absolute; top:29px; left:15px; z-index:2; font-size:8px; letter-spacing:.09em; opacity:.38; }
 
-  /* start overlay */
   #startOverlay {
     position:fixed; inset:0; z-index:5; display:flex; flex-direction:column;
     align-items:center; justify-content:center; gap:24px; text-align:center;
@@ -108,7 +100,7 @@
     background:linear-gradient(130deg,#b7a6ff 0%,#7fe7d4 48%,#ffd166 100%);
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
-  .ovSub { max-width:300px; font-size:13.5px; line-height:1.65; opacity:.62; font-weight:300; }
+  .ovSub { max-width:302px; font-size:13.5px; line-height:1.65; opacity:.62; font-weight:300; }
   #startBtn {
     pointer-events:auto; cursor:pointer; border:none; outline:none;
     font-family:'Space Grotesk',sans-serif; font-size:13px; letter-spacing:.4em; text-indent:.4em;
@@ -120,14 +112,13 @@
   }
   #startBtn:active { transform:scale(.96); }
   .ovNote { font-size:10.5px; opacity:.35; letter-spacing:.08em; max-width:290px; line-height:1.6; }
-
   #err {
     position:fixed; left:50%; bottom:120px; transform:translateX(-50%);
     z-index:6; font-size:12px; color:#ffb4c0; background:rgba(40,10,20,.6);
     border:1px solid rgba(255,120,150,.25); padding:12px 18px; border-radius:14px;
     display:none; max-width:86vw; text-align:center; backdrop-filter:blur(8px);
   }
-  @media (max-height:700px){ .ovTitle{font-size:42px} #vibeWord{font-size:28px} }
+  @media (max-height:700px){ .ovTitle{font-size:42px} #vibeWord{font-size:26px} }
 </style>
 </head>
 <body>
@@ -135,7 +126,7 @@
 <canvas id="stage"></canvas>
 
 <div id="ui">
-  <div class="brand">A U R A · field two</div>
+  <div class="brand">A U R A · field four</div>
   <div id="readout">
     <div id="vibeWord">listening…</div>
     <div id="vibeScore">— vibe</div>
@@ -151,335 +142,371 @@
   <div class="vc"><b id="vcLabel">VOICE</b><span id="vcSub">reading…</span></div>
 </div>
 
-<div id="peoplePanel">
-  <div class="panelKicker">anonymous voice field · session only</div>
-  <div id="peopleList"><div class="personRow"><b>Listening</b><span>finding voices…</span></div></div>
-</div>
-
-<div id="cosmicChip">
-  <div id="moonText">☾ finding sky…</div>
-  <div id="planetText">☿ ♀ ♂ ♃ ♄</div>
-  <div id="cosmicNote">celestial context · not a causal score</div>
-</div>
+<div id="people"></div>
 
 <div id="mapCard">
-  <div id="mapHead"><span>Field + sky map</span><span id="gzTag">✦ golden zone marked</span></div>
+  <div id="mapHead"><span>Field map · cosmic layer</span><span id="gzTag">✦ golden zone</span></div>
   <canvas id="mapCanvas"></canvas>
-  <div id="mapSource">finding local architecture… · OpenStreetMap</div>
+  <div id="cosmosLine">☾ reading the sky…</div>
   <div id="coords">—</div>
   <div id="scaleBar">5 m —</div>
 </div>
 
 <div id="startOverlay">
   <div class="ovTitle">AURA</div>
-  <div class="ovSub">A living field for the room. It reads rhythm, harmony, pitch movement and voice energy — never the words — then redraws real streets, buildings, anonymous people, place and celestial context around the vibe.</div>
+  <div class="ovSub">A living mood ring for the room you're in. It feels the emotional texture of sound, maps your path through real streets and buildings, reads the tone of every voice, and hangs the moon and planets over your position.</div>
   <button id="startBtn">Begin listening</button>
-  <div class="ovNote">Mic, motion + location stay live in this tab. Nothing is recorded, identified, transcribed or sent anywhere. Vibes are playful acoustic estimates, not facts about a person.</div>
+  <div class="ovNote">Uses mic, motion + location — live only, nothing recorded or sent anywhere. Allow all three permissions for the full experience.</div>
 </div>
 
 <div id="err"></div>
 
-<script src="aura-core.js?v=architecture-1"></script>
 <script>
 (() => {
-  /* ---------------- canvases ---------------- */
-  const stage = document.getElementById('stage');
-  const ctx = stage.getContext('2d');
-  const mapCanvas = document.getElementById('mapCanvas');
-  const mctx = mapCanvas.getContext('2d');
-  let W,H,DPR, MW,MH;
+  /* ================= canvases ================= */
+  const stage=document.getElementById('stage'), ctx=stage.getContext('2d');
+  const mapCanvas=document.getElementById('mapCanvas'), mctx=mapCanvas.getContext('2d');
+  let W,H,DPR,MW,MH;
   function resize(){
-    DPR = Math.min(window.devicePixelRatio||1, 2);
-    W = stage.width = Math.floor(innerWidth*DPR);
-    H = stage.height = Math.floor(innerHeight*DPR);
-    stage.style.width = innerWidth+'px'; stage.style.height = innerHeight+'px';
-    const r = mapCanvas.getBoundingClientRect();
-    MW = mapCanvas.width = Math.floor(r.width*DPR);
-    MH = mapCanvas.height = Math.floor(r.height*DPR);
+    DPR=Math.min(window.devicePixelRatio||1,2);
+    W=stage.width=Math.floor(innerWidth*DPR); H=stage.height=Math.floor(innerHeight*DPR);
+    stage.style.width=innerWidth+'px'; stage.style.height=innerHeight+'px';
+    const r=mapCanvas.getBoundingClientRect();
+    MW=mapCanvas.width=Math.floor(r.width*DPR); MH=mapCanvas.height=Math.floor(r.height*DPR);
   }
-  addEventListener('resize', () => setTimeout(resize, 60));
+  addEventListener('resize',()=>setTimeout(resize,60));
 
-  const readout = document.getElementById('readout');
-  const vibeWordEl = document.getElementById('vibeWord');
-  const vibeScoreEl = document.getElementById('vibeScore');
-  const moveTag = document.getElementById('moveTag');
-  const voiceChip = document.getElementById('voiceChip');
-  const vcLabel = document.getElementById('vcLabel');
-  const vcSub = document.getElementById('vcSub');
-  const vcIcon = document.getElementById('vcIcon');
-  const mapCard = document.getElementById('mapCard');
-  const gzTag = document.getElementById('gzTag');
-  const coordsEl = document.getElementById('coords');
-  const scaleEl = document.getElementById('scaleBar');
-  const errEl = document.getElementById('err');
-  const peoplePanel = document.getElementById('peoplePanel');
-  const peopleList = document.getElementById('peopleList');
-  const cosmicChip = document.getElementById('cosmicChip');
-  const moonText = document.getElementById('moonText');
-  const planetText = document.getElementById('planetText');
-  const mapSourceEl = document.getElementById('mapSource');
+  const $=id=>document.getElementById(id);
+  const readout=$('readout'), vibeWordEl=$('vibeWord'), vibeScoreEl=$('vibeScore'), moveTag=$('moveTag');
+  const voiceChip=$('voiceChip'), vcLabel=$('vcLabel'), vcSub=$('vcSub'), vcIcon=$('vcIcon');
+  const peopleEl=$('people'), mapCard=$('mapCard'), gzTag=$('gzTag');
+  const coordsEl=$('coords'), cosmosLine=$('cosmosLine'), scaleEl=$('scaleBar'), errEl=$('err');
 
-  /* ---------------- audio ---------------- */
-  let audioCtx, analyser, freqData, timeData, running=false;
+  /* ================= audio ================= */
+  let audioCtx,analyser,freqData,timeData,running=false;
+  const rmsHistory=[], levelHist=[];
   let vibe=0.35, vibeFast=0.35, level=0;
-  let bins = new Array(48).fill(0);          // circular spectrum ring
-  let priorNormalizedBins = new Array(48).fill(0);
-  const fluxHistory = [], pitchHistory = [];
-  let spectralFlux=0, rhythmVitality=0.35, spectralBalance=0.5, pitchExpression=0.35, harmonicity=0.45, socialEnergy=0.3;
-  // voice signatures are anonymous, approximate, session-only acoustic clusters
-  let voiceConf=0, voicePitch=0, pitchJitter=0, voiceVibe=0.5, voiceCentroid=800;
-  const speakerTracker = new AuraCore.SpeakerTracker({historyLimit:60, maxPeople:5, newSpeakerEvidence:3, warmupMs:8000, requireGapMs:1500});
-  let activePerson=null, lastSpeakerSample=0;
-  let cosmic = AuraCore.cosmicContext(0,0,new Date());
-  let lastCosmicUpdate=0;
-  let structureMap={buildings:[],roads:[]}, structureStatus='waiting', structureFix=null, lastStructureAttempt=0;
+  let bins=new Array(48).fill(0);
 
   async function startAudio(){
-    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false }
+    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    const stream=await navigator.mediaDevices.getUserMedia({
+      audio:{echoCancellation:false, noiseSuppression:false, autoGainControl:false}
     });
-    const src = audioCtx.createMediaStreamSource(stream);
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 2048; analyser.smoothingTimeConstant = 0.65;
-    src.connect(analyser);
-    freqData = new Uint8Array(analyser.frequencyBinCount);
-    timeData = new Float32Array(analyser.fftSize);
-    running = true;
+    audioCtx.createMediaStreamSource(stream).connect(analyser=audioCtx.createAnalyser());
+    analyser.fftSize=2048; analyser.smoothingTimeConstant=0.6;
+    freqData=new Uint8Array(analyser.frequencyBinCount);
+    timeData=new Float32Array(analyser.fftSize);
+    running=true;
   }
 
-  function autoCorrelatePitch(buf, sr){
+  function autoCorrelatePitch(buf,sr){
     let rms=0; for(let i=0;i<buf.length;i++) rms+=buf[i]*buf[i];
-    rms = Math.sqrt(rms/buf.length);
-    if(rms < 0.006) return {pitch:0, clarity:0};
-    const minLag = Math.floor(sr/350), maxLag = Math.floor(sr/75);
-    let bestLag=0, bestCorr=0;
-    for(let lag=minLag; lag<=maxLag; lag+=1){
-      let c=0;
-      for(let i=0;i<buf.length-lag;i+=2) c += buf[i]*buf[i+lag];
-      if(c>bestCorr){ bestCorr=c; bestLag=lag; }
+    rms=Math.sqrt(rms/buf.length);
+    if(rms<0.006) return {pitch:0,clarity:0};
+    const minLag=Math.floor(sr/350), maxLag=Math.floor(sr/75);
+    let bestLag=0,bestCorr=0;
+    for(let lag=minLag;lag<=maxLag;lag++){
+      let c=0; for(let i=0;i<buf.length-lag;i+=2) c+=buf[i]*buf[i+lag];
+      if(c>bestCorr){bestCorr=c;bestLag=lag;}
     }
-    let norm=0; for(let i=0;i<buf.length;i+=2) norm += buf[i]*buf[i];
-    const clarity = norm>0 ? bestCorr/norm : 0;
-    return { pitch: bestLag? sr/bestLag : 0, clarity };
+    let norm=0; for(let i=0;i<buf.length;i+=2) norm+=buf[i]*buf[i];
+    return {pitch:bestLag?sr/bestLag:0, clarity:norm>0?bestCorr/norm:0};
   }
 
-  function analyze(){
+  let voiceConf=0, voicePitch=0, pitchBase=0, pitchStd=0, voiceVibe=0.5;
+  let valence=0.5, arousal=0.4, strain=0, voiceCentroid=900, emoWord='reading…';
+  let sess=null, silenceMs=0, lastFrameT=0;
+
+  function analyze(now){
     analyser.getByteFrequencyData(freqData);
     analyser.getFloatTimeDomainData(timeData);
+    const dtms = lastFrameT? now-lastFrameT : 16; lastFrameT=now;
 
-    // Amplitude drives only the visual pulse and silence gate, never the vibe score.
     let sum=0; for(let i=0;i<timeData.length;i++) sum+=timeData[i]*timeData[i];
-    const rms = Math.sqrt(sum/timeData.length);
-    level += (Math.min(1, rms*9) - level)*0.14;
+    const rms=Math.sqrt(sum/timeData.length);
+    level+=(Math.min(1,rms*9)-level)*0.14;
+    rmsHistory.push(rms); if(rmsHistory.length>90) rmsHistory.shift();
+    levelHist.push(level); if(levelHist.length>45) levelHist.shift();
 
-    const nyq = audioCtx.sampleRate/2;
-    let total=0, weighted=0, low=0, mid=0, high=0, peak=0;
+    const nyq=audioCtx.sampleRate/2;
+    let total=0,weighted=0,high=0;
     for(let i=1;i<freqData.length;i++){
-      const value=freqData[i], frequency=i/freqData.length*nyq;
-      total+=value; weighted+=value*frequency; peak=Math.max(peak,value);
-      if(frequency<350) low+=value;
-      else if(frequency<2500) mid+=value;
-      else if(frequency<8000) high+=value;
+      const v=freqData[i], f=i/freqData.length*nyq;
+      total+=v; weighted+=v*f; if(f>4500) high+=v;
     }
-    const centroid = total>0? weighted/total : 0;
-    const audibleTotal=Math.max(low+mid+high,1);
-    const lowRatio=low/audibleTotal, midRatio=mid/audibleTotal, highRatio=high/audibleTotal;
+    const centroid=total>0?weighted/total:0;
+    const highRatio=total>0?high/total:0;
 
-    // Spectrum ring and normalized spectral motion. Normalization removes loudness.
-    const maxBin = Math.floor(freqData.length * (8000/nyq));
+    const maxBin=Math.floor(freqData.length*(8000/nyq));
     for(let b=0;b<bins.length;b++){
-      const i0 = Math.floor(Math.pow(b/bins.length,1.6)*maxBin);
-      const i1 = Math.max(i0+1, Math.floor(Math.pow((b+1)/bins.length,1.6)*maxBin));
+      const i0=Math.floor(Math.pow(b/bins.length,1.6)*maxBin);
+      const i1=Math.max(i0+1,Math.floor(Math.pow((b+1)/bins.length,1.6)*maxBin));
       let m=0; for(let i=i0;i<i1;i++) m=Math.max(m,freqData[i]);
-      bins[b] += (m/255 - bins[b])*0.35;
+      bins[b]+=(m/255-bins[b])*0.35;
     }
-    const binTotal=Math.max(bins.reduce((a,b)=>a+b,0),0.0001);
-    const normalizedBins=bins.map(value=>value/binTotal);
-    let rawFlux=0;
-    for(let i=0;i<normalizedBins.length;i++) rawFlux+=Math.abs(normalizedBins[i]-priorNormalizedBins[i]);
-    priorNormalizedBins=normalizedBins;
-    spectralFlux += (AuraCore.clamp01(rawFlux*5.5)-spectralFlux)*0.22;
-    fluxHistory.push(spectralFlux); if(fluxHistory.length>90) fluxHistory.shift();
-    const meanFlux=fluxHistory.reduce((a,b)=>a+b,0)/Math.max(1,fluxHistory.length);
-    let fluxVariance=0; for(const value of fluxHistory) fluxVariance+=(value-meanFlux)*(value-meanFlux);
-    const fluxPulse=Math.sqrt(fluxVariance/Math.max(1,fluxHistory.length));
-    rhythmVitality += (AuraCore.clamp01(meanFlux*1.8+fluxPulse*4.5)-rhythmVitality)*0.08;
 
-    // Balanced means a broad, connected spectrum — not merely soft or dark.
-    const balanceTarget=AuraCore.clamp01(1-Math.abs(lowRatio-.27)*1.25-Math.abs(midRatio-.51)*.75-Math.abs(highRatio-.22)*1.05);
-    spectralBalance += (balanceTarget-spectralBalance)*0.08;
+    const mean=rmsHistory.reduce((a,b)=>a+b,0)/rmsHistory.length;
+    let vs=0; for(const r of rmsHistory) vs+=(r-mean)*(r-mean);
+    const cv=mean>0.0015?Math.sqrt(vs/rmsHistory.length)/mean:0.4;
 
-    const {pitch, clarity} = autoCorrelatePitch(timeData, audioCtx.sampleRate);
-    const isVoiceFrame = clarity>0.45 && pitch>75 && pitch<340 && rms>0.006;
-    voiceConf += ((isVoiceFrame?1:0) - voiceConf) * (isVoiceFrame?0.10:0.035);
+    const warmScore=1-Math.min(1,Math.max(0,(centroid-500))/3800);
+    const smoothScore=1-Math.min(1,highRatio*2.6);
+    const steadyScore=1-Math.min(1,Math.max(0,cv-0.30)/1.3);
+    const aliveScore=Math.min(1,level*1.7)*smoothScore;
+    const db=20*Math.log10(Math.max(rms,1e-6));
+    const comfortScore = db<-60?0.55 : db<-10?0.85 : Math.max(0.2,0.85-(db+10)/10*0.65);
 
-    if(isVoiceFrame){
-      if(voicePitch===0) voicePitch=pitch;
-      pitchJitter += (Math.abs(pitch-voicePitch)/Math.max(voicePitch,1)-pitchJitter)*0.1;
-      voicePitch += (pitch-voicePitch)*0.15;
-      voiceCentroid += (centroid-voiceCentroid)*0.1;
-      pitchHistory.push(pitch); if(pitchHistory.length>70) pitchHistory.shift();
-      const meanPitch=pitchHistory.reduce((a,b)=>a+b,0)/pitchHistory.length;
-      let pitchVariance=0; for(const value of pitchHistory) pitchVariance+=(value-meanPitch)*(value-meanPitch);
-      const pitchMotion=Math.sqrt(pitchVariance/Math.max(1,pitchHistory.length))/Math.max(meanPitch,1);
-      pitchExpression += (AuraCore.clamp01(pitchMotion*5+clarity*.25)-pitchExpression)*0.12;
-      harmonicity += (AuraCore.clamp01(clarity)-harmonicity)*0.12;
-      socialEnergy += (AuraCore.clamp01(voiceConf*.55+rhythmVitality*.45)-socialEnergy)*0.1;
+    vibeFast = warmScore*0.24 + smoothScore*0.20 + aliveScore*0.24 + steadyScore*0.10 + comfortScore*0.22 + cosmicMod;
+    vibe += (Math.min(1,Math.max(0,vibeFast))-vibe)*0.014;
 
-      const voiceTarget=AuraCore.roomVibe({
-        harmonicity:clarity,
-        spectralBalance,
-        spectralFlux,
-        rhythmVitality,
-        pitchExpression,
-        socialEnergy
-      });
-      voiceVibe += (voiceTarget-voiceVibe)*0.055;
-      const now=performance.now();
-      if(now-lastSpeakerSample>650){
-        activePerson=speakerTracker.observe({pitch:voicePitch,centroid:voiceCentroid,harmonicity:clarity},voiceVibe,Date.now());
-        voiceMarks.push({x:pos.x,y:pos.y,vibe:voiceVibe,personId:activePerson.id,ts:Date.now()});
-        if(voiceMarks.length>80) voiceMarks.shift();
-        lastSpeakerSample=now;
-      }
+    const {pitch,clarity}=autoCorrelatePitch(timeData,audioCtx.sampleRate);
+    const isVoice=clarity>0.45 && pitch>75 && pitch<340 && level>0.05;
+    voiceConf+=((isVoice?1:0)-voiceConf)*(isVoice?0.10:0.035);
+
+    if(isVoice){
+      silenceMs=0;
+      if(!sess) sess={n:0,pSum:0,vSum:0,valSum:0,aroSum:0,start:now};
+      if(pitchBase===0) pitchBase=pitch;
+      pitchBase+=(pitch-pitchBase)*0.01;
+      voicePitch+=(pitch-voicePitch)*0.2;
+      const dev=Math.abs(pitch-pitchBase)/Math.max(pitchBase,1);
+      pitchStd+=(dev-pitchStd)*0.08;
+      voiceCentroid+=(centroid-voiceCentroid)*0.1;
+      strain+=(Math.min(1,highRatio*3)-strain)*0.08;
+
+      let lm=0; for(let i=1;i<levelHist.length;i++) lm+=Math.abs(levelHist[i]-levelHist[i-1]);
+      const modAmt=Math.min(1, lm*2.2);
+      const pitchLift=Math.min(1,Math.max(0,(voicePitch-pitchBase)/pitchBase*5+0.5));
+      const aT=Math.min(1, pitchLift*0.45 + modAmt*0.35 + Math.min(1,level*1.8)*0.20);
+      arousal+=(aT-arousal)*0.05;
+      const melody=1-Math.min(1,Math.abs(pitchStd-0.075)/0.11);
+      const warmTone=1-Math.min(1,Math.max(0,(voiceCentroid-550))/2800);
+      const vT=Math.min(1, melody*0.40 + warmTone*0.38 + (1-strain)*0.22);
+      valence+=(vT-valence)*0.05;
+      const vv=valence + (arousal-0.45)*(valence-0.5)*0.9;
+      voiceVibe+=(Math.min(1,Math.max(0,vv))-voiceVibe)*0.05;
+      emoWord = emotionWord(valence,arousal);
+      sess.n++; sess.pSum+=pitch; sess.vSum+=voiceVibe; sess.valSum+=valence; sess.aroSum+=arousal;
     } else {
-      const meanMagnitude=total/Math.max(1,freqData.length);
-      const tonalPeak=AuraCore.clamp01((peak/Math.max(meanMagnitude,1)-1)/9);
-      harmonicity += (tonalPeak-harmonicity)*0.025;
-      pitchExpression += (spectralFlux-pitchExpression)*0.018;
-      socialEnergy += (AuraCore.clamp01(rhythmVitality*.65+midRatio*.35)-socialEnergy)*0.035;
+      silenceMs+=dtms;
+      if(sess && silenceMs>2200){
+        if(sess.n>45) logPerson(sess);
+        sess=null; pitchBase=0;
+      }
     }
-
-    vibeFast=AuraCore.roomVibe({harmonicity,spectralBalance,spectralFlux,rhythmVitality,pitchExpression,socialEnergy});
-    if(voiceConf>0.45) vibeFast=vibeFast*.58+voiceVibe*.42;
-    vibe += (vibeFast-vibe)*0.018;
   }
 
-  /* ---------------- motion ---------------- */
+  function emotionWord(v,a){
+    if(v>=0.60) return a>=0.55 ? 'electric joy' : 'warm calm';
+    if(v>=0.45) return a>=0.60 ? 'animated' : 'easygoing';
+    return a>=0.55 ? 'tense' : 'heavy';
+  }
+
+  /* ================= person log ================= */
+  const persons=[];
+  function logPerson(s){
+    const pMed=s.pSum/s.n, avgV=s.vSum/s.n, avgVal=s.valSum/s.n, avgAro=s.aroSum/s.n;
+    let person=persons.find(p=>Math.abs(p.pitch-pMed)/p.pitch<0.13);
+    if(!person){
+      person={id:persons.length+1,pitch:pMed,v:avgV,val:avgVal,aro:avgAro};
+      persons.push(person);
+    } else {
+      person.pitch=(person.pitch+pMed)/2;
+      person.v=person.v*0.5+avgV*0.5; person.val=person.val*0.5+avgVal*0.5; person.aro=person.aro*0.5+avgAro*0.5;
+    }
+    renderPeople();
+  }
+  function renderPeople(){
+    peopleEl.innerHTML='';
+    for(const p of persons.slice(-6)){
+      const h=vibeHue(p.v);
+      const d=document.createElement('div'); d.className='pChip';
+      d.innerHTML=`<svg viewBox="0 0 24 24" fill="none" style="color:hsl(${h},90%,72%)">
+        <circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M5.5 19c.9-3.4 3.5-5 6.5-5s5.6 1.6 6.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <div class="pt"><b>Person ${p.id}</b> · ${Math.round(p.v*100)} <span>· ${emotionWord(p.val,p.aro)} · ${Math.round(p.pitch)}hz</span></div>`;
+      peopleEl.appendChild(d);
+    }
+  }
+
+  /* ================= motion / position ================= */
   let moveLevel=0, heading=0, ripples=[];
   function onMotion(e){
-    const a = e.acceleration;
-    if(!a || a.x===null) return;
-    const mag = Math.sqrt(a.x*a.x + a.y*a.y + a.z*a.z);
-    moveLevel += (Math.min(1, Math.max(0,mag-0.35)/3.2) - moveLevel)*0.08;
+    const a=e.acceleration; if(!a||a.x===null) return;
+    const mag=Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z);
+    moveLevel+=(Math.min(1,Math.max(0,mag-0.35)/3.2)-moveLevel)*0.08;
   }
   function onOrient(e){
-    if(e.webkitCompassHeading!==undefined) heading = e.webkitCompassHeading*Math.PI/180;
-    else if(e.alpha!==null) heading = (360-e.alpha)*Math.PI/180;
+    if(e.webkitCompassHeading!==undefined) heading=e.webkitCompassHeading*Math.PI/180;
+    else if(e.alpha!==null) heading=(360-e.alpha)*Math.PI/180;
   }
 
-  /* ---------------- position / trail ---------------- */
-  let origin=null, pos={x:0,y:0}, lastFixTime=0, lastLL=null;
-  const trail=[];                     // {x,y,vibe,personId,moonPhase}
-  const voiceMarks=[];                // anonymous session-only voice observations
-  let best={x:0,y:0,v:0,has:false};
-  let gzPing=0;
+  let origin=null,pos={x:0,y:0},lastFixTime=0,lastLL=null;
+  const trail=[]; let best={x:0,y:0,v:0,has:false}, gzPing=0;
 
-  function refreshCosmic(force=false){
-    const now=Date.now();
-    if(!force && now-lastCosmicUpdate<60000) return;
-    cosmic=AuraCore.cosmicContext(lastLL?.lat||0,lastLL?.lng||0,new Date(now));
-    lastCosmicUpdate=now;
-    const moonIcons={'new moon':'●','waxing crescent':'☽','first quarter':'◐','waxing gibbous':'◕','full moon':'○','waning gibbous':'◔','last quarter':'◑','waning crescent':'☾'};
-    moonText.textContent=`${moonIcons[cosmic.moon.name]||'☾'} ${cosmic.moon.name} · ${Math.round(cosmic.moon.illumination*100)}%`;
-    planetText.textContent=cosmic.planets.map(p=>`${p.symbol}${Math.round(p.longitude)}°`).join('  ');
-    cosmicChip.classList.add('on');
+  function ll2xy(lat,lng){
+    return {
+      x:(lng-origin.lng)*111320*Math.cos(origin.lat*Math.PI/180),
+      y:-(lat-origin.lat)*110540
+    };
   }
-
-  async function loadStructures(lat,lng){
-    if(structureStatus==='loading') return;
-    if(Date.now()-lastStructureAttempt<60000) return;
-    if(structureFix){
-      const delta=AuraCore.geoToLocal(lat,lng,structureFix.lat,structureFix.lng);
-      if(Math.hypot(delta.x,delta.y)<120) return;
-    }
-    lastStructureAttempt=Date.now();
-    structureStatus='loading';
-    mapSourceEl.textContent='drawing streets + architecture… · OpenStreetMap';
-    const latRadius=0.00165;
-    const lonRadius=latRadius/Math.max(.25,Math.cos(lat*Math.PI/180));
-    const bbox=[lat-latRadius,lng-lonRadius,lat+latRadius,lng+lonRadius].join(',');
-    const query=`[out:json][timeout:14];(way["building"](${bbox});way["building:part"](${bbox});way["highway"](${bbox}););out geom qt;`;
-    const endpoints=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'];
-    let payload=null;
-    for(const endpoint of endpoints){
-      const controller=new AbortController();
-      const timer=setTimeout(()=>controller.abort(),16000);
-      try{
-        const response=await fetch(`${endpoint}?data=${encodeURIComponent(query)}`,{signal:controller.signal});
-        if(response.ok){ payload=await response.json(); break; }
-      }catch(error){} finally { clearTimeout(timer); }
-    }
-    if(payload){
-      structureMap=AuraCore.mapStructures(payload.elements||[],origin?.lat||lat,origin?.lng||lng);
-      structureFix={lat,lng}; structureStatus='loaded';
-      mapSourceEl.textContent=`${structureMap.buildings.length} buildings · ${structureMap.roads.length} roads · OpenStreetMap`;
-    } else {
-      structureStatus='unavailable';
-      mapSourceEl.textContent='local architecture unavailable · field still live';
-    }
-  }
-
   function startGeo(){
-    refreshCosmic(true);
     if(!navigator.geolocation) return;
     navigator.geolocation.watchPosition(p=>{
-      const {latitude:lat, longitude:lng, accuracy} = p.coords;
-      lastLL = {lat,lng,accuracy};
-      if(!origin) origin={lat,lng};
-      const x = (lng-origin.lng)*111320*Math.cos(origin.lat*Math.PI/180);
-      const y = -(lat-origin.lat)*110540;
-      // blend so it doesn't teleport
-      pos.x += (x-pos.x)*0.25; pos.y += (y-pos.y)*0.25;
-      lastFixTime = performance.now();
-      refreshCosmic(true);
-      loadStructures(lat,lng);
-    }, ()=>{}, {enableHighAccuracy:true, maximumAge:1000, timeout:15000});
+      const {latitude:lat,longitude:lng,accuracy}=p.coords;
+      lastLL={lat,lng,accuracy};
+      if(!origin){ origin={lat,lng}; fetchOSM(lat,lng); }
+      const q=ll2xy(lat,lng);
+      pos.x+=(q.x-pos.x)*0.25; pos.y+=(q.y-pos.y)*0.25;
+      lastFixTime=performance.now();
+      // re-fetch structures if we wandered far from last fetch center
+      if(osm.center && Math.hypot(q.x-osm.center.x,q.y-osm.center.y)>170 && !osm.fetching) fetchOSM(lat,lng);
+    },()=>{},{enableHighAccuracy:true,maximumAge:1000,timeout:15000});
   }
-
-  let lastTrailT=0, lastDR=0;
+  let lastTrailT=0,lastDR=0;
   function updatePosition(now){
-    // dead-reckoning between/without GPS fixes so indoor walking still traces
-    const dt = lastDR? (now-lastDR)/1000 : 0; lastDR=now;
+    const dt=lastDR?(now-lastDR)/1000:0; lastDR=now;
     if(moveLevel>0.12 && now-lastFixTime>1500){
-      const sp = 0.9*moveLevel;   // m/s
-      pos.x += Math.sin(heading)*sp*dt;
-      pos.y -= Math.cos(heading)*sp*dt;
+      const sp=0.9*moveLevel;
+      pos.x+=Math.sin(heading)*sp*dt; pos.y-=Math.cos(heading)*sp*dt;
     }
-    // record trail
-    const last = trail[trail.length-1];
-    const distOk = !last || Math.hypot(pos.x-last.x,pos.y-last.y)>0.6;
-    if(now-lastTrailT>900 && distOk){
-      trail.push({x:pos.x,y:pos.y,vibe,personId:activePerson?.id||null,moonPhase:cosmic.moon.phase});
+    const last=trail[trail.length-1];
+    const distOk=!last||Math.hypot(pos.x-last.x,pos.y-last.y)>0.6;
+    if(now-lastTrailT>900&&distOk){
+      trail.push({x:pos.x,y:pos.y,vibe});
       if(trail.length>260) trail.shift();
       lastTrailT=now;
-      if(vibe > best.v + 0.015 || !best.has){
+      if(vibe>best.v+0.015||!best.has){
         best={x:pos.x,y:pos.y,v:vibe,has:true};
-        if(vibe>0.6){ gzTag.classList.add('on'); gzPing=1; }
+        if(vibe>0.6){gzTag.classList.add('on');gzPing=1;}
       }
     }
   }
 
-  /* ---------------- visuals ---------------- */
-  function vibeHue(v){ return v<0.5 ? 262+(175-262)*(v/0.5) : 175+(44-175)*((v-0.5)/0.5); }
+  /* ================= structures — real city, drawn in light ================= */
+  /* Live OpenStreetMap data: buildings, roads, water and parks around you,
+     re-fetched as you roam. Rendered as luminous blueprint architecture. */
+  const osm={buildings:[],roads:[],water:[],parks:[],center:null,fetching:false};
+  const OVERPASS=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'];
+  async function fetchOSM(lat,lng){
+    osm.fetching=true;
+    const q=`[out:json][timeout:25];(
+      way["building"](around:280,${lat},${lng});
+      way["highway"](around:280,${lat},${lng});
+      way["natural"="water"](around:340,${lat},${lng});
+      way["waterway"="river"](around:340,${lat},${lng});
+      way["leisure"~"park|garden"](around:340,${lat},${lng});
+    );out geom;`;
+    for(const ep of OVERPASS){
+      try{
+        const res=await fetch(ep,{method:'POST',body:'data='+encodeURIComponent(q),
+          headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+        if(!res.ok) continue;
+        const data=await res.json();
+        osm.buildings=[]; osm.roads=[]; osm.water=[]; osm.parks=[];
+        for(const el of (data.elements||[])){
+          if(!el.geometry) continue;
+          const pts=el.geometry.map(g=>ll2xy(g.lat,g.lon));
+          const tg=el.tags||{};
+          if(tg.building) osm.buildings.push({pts});
+          else if(tg.highway){
+            const major=/motorway|trunk|primary|secondary|tertiary/.test(tg.highway);
+            const minor=/residential|service|unclassified|living_street/.test(tg.highway);
+            osm.roads.push({pts, w: major?2.6: minor?1.7:1.0, foot:!major&&!minor});
+          }
+          else if(tg.natural==='water'||tg.waterway) osm.water.push({pts,line:!!tg.waterway});
+          else if(tg.leisure) osm.parks.push({pts});
+        }
+        osm.center={...ll2xy(lat,lng)};
+        break;
+      }catch(e){ /* try next endpoint */ }
+    }
+    osm.fetching=false;
+  }
 
+  /* ================= cosmos — real ephemeris ================= */
+  let cosmos=null, cosmicMod=0;
+  const RAD=Math.PI/180;
+  const rev=x=>{x%=360;return x<0?x+360:x;};
+  function bodyPos(el,d,sun){
+    const N=rev(el.N),i=el.i,w=rev(el.w),a=el.a,e=el.e,M=rev(el.M)*RAD;
+    let E=M+e*Math.sin(M)*(1+e*Math.cos(M));
+    for(let k=0;k<5;k++) E=E-(E-e*Math.sin(E)-M)/(1-e*Math.cos(E));
+    const xv=a*(Math.cos(E)-e), yv=a*Math.sqrt(1-e*e)*Math.sin(E);
+    const v=Math.atan2(yv,xv), r=Math.hypot(xv,yv);
+    const u=v+w*RAD, Nr=N*RAD, ir=i*RAD;
+    let xh=r*(Math.cos(Nr)*Math.cos(u)-Math.sin(Nr)*Math.sin(u)*Math.cos(ir));
+    let yh=r*(Math.sin(Nr)*Math.cos(u)+Math.cos(Nr)*Math.sin(u)*Math.cos(ir));
+    let zh=r*Math.sin(u)*Math.sin(ir);
+    if(sun){ xh+=sun.x; yh+=sun.y; zh+=sun.z; }
+    return {x:xh,y:yh,z:zh, lon:rev(Math.atan2(yh,xh)/RAD)};
+  }
+  function altAz(x,y,z,d,lat,lng,Lsun){
+    const ob=(23.4393-3.563e-7*d)*RAD;
+    const xe=x, ye=y*Math.cos(ob)-z*Math.sin(ob), ze=y*Math.sin(ob)+z*Math.cos(ob);
+    const RA=rev(Math.atan2(ye,xe)/RAD), Dec=Math.atan2(ze,Math.hypot(xe,ye));
+    const UT=((d%1)+1)%1*24;
+    const GMST0=rev(Lsun+180)/15;
+    const LST=(GMST0+UT+lng/15)%24;
+    const HA=rev(LST*15-RA)*RAD, latR=lat*RAD;
+    const alt=Math.asin(Math.sin(latR)*Math.sin(Dec)+Math.cos(latR)*Math.cos(Dec)*Math.cos(HA));
+    const az=rev(Math.atan2(Math.sin(HA),Math.cos(HA)*Math.sin(latR)-Math.tan(Dec)*Math.cos(latR))/RAD+180);
+    return {alt:alt/RAD, az};
+  }
+  function computeCosmos(){
+    const lat=lastLL?lastLL.lat:34.05, lng=lastLL?lastLL.lng:-118.24;
+    const d=(Date.now()/86400000+2440587.5)-2451543.5;
+    const ws=rev(282.9404+4.70935e-5*d), Ms=rev(356.0470+0.9856002585*d), es=0.016709-1.151e-9*d;
+    const Es=Ms*RAD+es*Math.sin(Ms*RAD)*(1+es*Math.cos(Ms*RAD));
+    const xvs=Math.cos(Es)-es, yvs=Math.sqrt(1-es*es)*Math.sin(Es);
+    const vsun=Math.atan2(yvs,xvs), rs=Math.hypot(xvs,yvs);
+    const Lsun=rev((vsun/RAD)+ws);
+    const sun={x:rs*Math.cos(Lsun*RAD), y:rs*Math.sin(Lsun*RAD), z:0};
+    const els={
+      Moon:{N:125.1228-0.0529538083*d,i:5.1454,w:318.0634+0.1643573223*d,a:60.2666,e:0.0549,M:115.3654+13.0649929509*d,geo:1,sym:'☾'},
+      Mercury:{N:48.3313+3.24587e-5*d,i:7.0047,w:29.1241+1.01444e-5*d,a:0.387098,e:0.205635,M:168.6562+4.0923344368*d,sym:'☿'},
+      Venus:{N:76.6799+2.4659e-5*d,i:3.3946,w:54.8910+1.38374e-5*d,a:0.72333,e:0.006773,M:48.0052+1.6021302244*d,sym:'♀'},
+      Mars:{N:49.5574+2.11081e-5*d,i:1.8497,w:286.5016+2.92961e-5*d,a:1.523688,e:0.093405,M:18.6021+0.5240207766*d,sym:'♂'},
+      Jupiter:{N:100.4542+2.76854e-5*d,i:1.3030,w:273.8777+1.64505e-5*d,a:5.20256,e:0.048498,M:19.8950+0.0830853001*d,sym:'♃'},
+      Saturn:{N:113.6634+2.3898e-5*d,i:2.4886,w:339.3939+2.97661e-5*d,a:9.55475,e:0.055546,M:316.9670+0.0334442282*d,sym:'♄'}
+    };
+    const bodies=[]; let moonLon=0;
+    for(const [name,el] of Object.entries(els)){
+      const p=bodyPos(el,d, el.geo?null:sun);
+      const aa=altAz(p.x,p.y,p.z,d,lat,lng,Lsun);
+      if(name==='Moon') moonLon=p.lon;
+      bodies.push({name,sym:el.sym,alt:aa.alt,az:aa.az});
+    }
+    const elong=rev(moonLon-Lsun);
+    const ill=(1-Math.cos(elong*RAD))/2;
+    const phases=['new moon','waxing crescent','first quarter','waxing gibbous','full moon','waning gibbous','last quarter','waning crescent'];
+    const phaseName=phases[Math.floor(rev(elong+22.5)/45)%8];
+    const planetsUp=bodies.filter(b=>b.name!=='Moon'&&b.alt>0).length;
+    const tide=Math.min(1, ill*0.6 + planetsUp/5*0.4);
+    cosmicMod=(tide-0.5)*0.06;
+    cosmos={bodies,ill,phaseName,planetsUp,tide};
+    cosmosLine.textContent=`☾ ${phaseName} ${Math.round(ill*100)}% · ${planetsUp} planets up · cosmic tide ${Math.round(tide*100)}`;
+  }
+
+  /* ================= visuals ================= */
+  function vibeHue(v){return v<0.5?262+(175-262)*(v/0.5):175+(44-175)*((v-0.5)/0.5);}
   const P=[]; for(let i=0;i<95;i++) P.push({
-    a:Math.random()*Math.PI*2, r:0.55+Math.random()*0.9,
+    a:Math.random()*Math.PI*2,r:0.55+Math.random()*0.9,
     sp:(0.0018+Math.random()*0.004)*(Math.random()<0.5?-1:1),
-    sz:0.6+Math.random()*2.2, ph:Math.random()*Math.PI*2, wob:0.02+Math.random()*0.08
+    sz:0.6+Math.random()*2.2,ph:Math.random()*Math.PI*2,wob:0.02+Math.random()*0.08
   });
 
-  let t=0, frame=0;
+  let t=0,frame=0;
   function draw(now){
     requestAnimationFrame(draw);
     t+=0.008; frame++;
-    if(running){ analyze(); updatePosition(now); }
+    if(running){ analyze(now); updatePosition(now); }
 
-    const cx=W/2, cy=H*0.33, base=Math.min(W,H);
+    const cx=W/2, cy=H*0.30, base=Math.min(W,H);
     const hue=vibeHue(vibe), sat=62+vibe*30;
     const pulse=1+level*0.22+Math.sin(t*2.4)*0.015;
-    const orbR=base*0.135*pulse;
+    const orbR=base*0.13*pulse;
 
     const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,base*0.95);
     bg.addColorStop(0,`hsla(${hue},${sat*0.7}%,${9+vibe*7}%,1)`);
@@ -488,7 +515,6 @@
     ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
     ctx.globalCompositeOperation='lighter';
 
-    // aura
     for(let i=3;i>=1;i--){
       const r=orbR*(1.6+i*0.9+level*0.8);
       const g=ctx.createRadialGradient(cx,cy,orbR*0.2,cx,cy,r);
@@ -496,36 +522,33 @@
       g.addColorStop(1,'hsla(0,0%,0%,0)');
       ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
     }
-    // core
     const core=ctx.createRadialGradient(cx-orbR*0.25,cy-orbR*0.3,orbR*0.05,cx,cy,orbR);
     core.addColorStop(0,`hsla(${hue+20},100%,92%,.95)`);
     core.addColorStop(0.45,`hsla(${hue},${sat}%,64%,.85)`);
     core.addColorStop(1,`hsla(${hue-18},${sat}%,38%,0)`);
     ctx.fillStyle=core; ctx.beginPath(); ctx.arc(cx,cy,orbR,0,Math.PI*2); ctx.fill();
 
-    // live spectrum ring — the frequencies, moving with the room
     const ringR=orbR*1.5;
     for(let b=0;b<bins.length;b++){
-      const ang=(b/bins.length)*Math.PI*2 - Math.PI/2;
+      const ang=(b/bins.length)*Math.PI*2-Math.PI/2;
       const len=bins[b]*orbR*0.85;
-      const x0=cx+Math.cos(ang)*ringR, y0=cy+Math.sin(ang)*ringR;
-      const x1=cx+Math.cos(ang)*(ringR+len), y1=cy+Math.sin(ang)*(ringR+len);
       ctx.strokeStyle=`hsla(${hue+bins[b]*40},95%,72%,${0.12+bins[b]*0.55})`;
       ctx.lineWidth=2.2*DPR; ctx.lineCap='round';
-      ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx+Math.cos(ang)*ringR,cy+Math.sin(ang)*ringR);
+      ctx.lineTo(cx+Math.cos(ang)*(ringR+len),cy+Math.sin(ang)*(ringR+len));
+      ctx.stroke();
     }
 
-    // movement ripples
-    if(moveLevel>0.14 && frame%14===0) ripples.push({r:orbR*1.2, a:0.5*moveLevel+0.15});
+    if(moveLevel>0.14&&frame%14===0) ripples.push({r:orbR*1.2,a:0.5*moveLevel+0.15});
     for(let i=ripples.length-1;i>=0;i--){
       const rp=ripples[i]; rp.r+=base*0.006; rp.a*=0.955;
-      if(rp.a<0.01){ ripples.splice(i,1); continue; }
+      if(rp.a<0.01){ripples.splice(i,1);continue;}
       ctx.strokeStyle=`hsla(${hue+15},90%,78%,${rp.a})`;
       ctx.lineWidth=1.1*DPR;
       ctx.beginPath(); ctx.arc(cx,cy,rp.r,0,Math.PI*2); ctx.stroke();
     }
 
-    // particles
     for(const p of P){
       p.a+=p.sp*(1+level*1.6+moveLevel*1.2);
       const rr=orbR*(p.r*2.2+Math.sin(t*1.7+p.ph)*p.wob*6);
@@ -537,211 +560,195 @@
 
     drawMap();
     if(frame%18===0) updateReadout();
+    if(frame%3600===1) computeCosmos();
   }
 
-  /* ---------------- field map ---------------- */
+  /* ================= field map ================= */
+  function inView(pts,T){
+    for(const p of pts){
+      const [x,y]=T(p);
+      if(x>-60&&x<MW+60&&y>-60&&y<MH+60) return true;
+    }
+    return false;
+  }
+  function pathOf(pts,T){
+    mctx.beginPath();
+    for(let i=0;i<pts.length;i++){
+      const [x,y]=T(pts[i]);
+      i===0?mctx.moveTo(x,y):mctx.lineTo(x,y);
+    }
+  }
   function drawMap(){
-    if(!MW || frame%2) return;
+    if(!MW) return;
     mctx.clearRect(0,0,MW,MH);
     const hue=vibeHue(vibe);
 
-    // fit view
-    const hasStructures=structureMap.buildings.length+structureMap.roads.length>0;
-    const viewRadius=hasStructures?110:4;
-    let minX=pos.x-viewRadius,maxX=pos.x+viewRadius,minY=pos.y-viewRadius,maxY=pos.y+viewRadius;
-    for(const p of trail){ minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);minY=Math.min(minY,p.y);maxY=Math.max(maxY,p.y); }
-    if(best.has){ minX=Math.min(minX,best.x);maxX=Math.max(maxX,best.x);minY=Math.min(minY,best.y);maxY=Math.max(maxY,best.y); }
-    const spanX=Math.max(maxX-minX,8), spanY=Math.max(maxY-minY,8);
-    const pad=42*DPR;
+    let minX=pos.x-4,maxX=pos.x+4,minY=pos.y-4,maxY=pos.y+4;
+    for(const p of trail){minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);minY=Math.min(minY,p.y);maxY=Math.max(maxY,p.y);}
+    if(best.has){minX=Math.min(minX,best.x);maxX=Math.max(maxX,best.x);minY=Math.min(minY,best.y);maxY=Math.max(maxY,best.y);}
+    const spanX=Math.max(maxX-minX,14),spanY=Math.max(maxY-minY,14);
+    const pad=46*DPR;
     const scale=Math.min((MW-pad*2)/spanX,(MH-pad*2)/spanY);
     const ox=MW/2-(minX+maxX)/2*scale, oy=MH/2-(minY+maxY)/2*scale;
-    const T=(p)=>[ox+p.x*scale, oy+p.y*scale];
+    const T=p=>[ox+p.x*scale,oy+p.y*scale];
 
-    // Real street and building geometry, redrawn as a luminous top-down city.
-    mctx.save();
+    /* --- the real city, drawn in light --- */
     mctx.globalCompositeOperation='source-over';
-    const roadWidths={motorway:8,trunk:7,primary:6,secondary:5,tertiary:4,residential:3.2,service:2.2,footway:1.2,path:1.1,pedestrian:2.4};
-    for(const road of structureMap.roads){
-      if(road.points.length<2) continue;
-      mctx.beginPath();
-      road.points.forEach((point,index)=>{ const [x,y]=T(point); index?mctx.lineTo(x,y):mctx.moveTo(x,y); });
-      const width=(roadWidths[road.kind]||2.2)*DPR;
-      mctx.strokeStyle='rgba(4,3,12,.82)'; mctx.lineWidth=width+4*DPR; mctx.lineJoin='round'; mctx.lineCap='round'; mctx.stroke();
-      mctx.strokeStyle=`hsla(${hue+18},55%,68%,.18)`; mctx.lineWidth=width; mctx.stroke();
-      if(['motorway','trunk','primary','secondary','tertiary'].includes(road.kind)){
-        mctx.setLineDash([5*DPR,6*DPR]); mctx.strokeStyle='rgba(255,241,198,.22)'; mctx.lineWidth=.7*DPR; mctx.stroke(); mctx.setLineDash([]);
+    // parks: soft breathing green washes
+    for(const pk of osm.parks){
+      if(!inView(pk.pts,T)) continue;
+      pathOf(pk.pts,T); mctx.closePath();
+      mctx.fillStyle=`hsla(150,55%,45%,${0.06+Math.sin(t*0.9)*0.015})`;
+      mctx.fill();
+      mctx.strokeStyle='hsla(150,60%,62%,.14)'; mctx.lineWidth=1*DPR; mctx.stroke();
+    }
+    // water: deep teal glass
+    for(const wt of osm.water){
+      if(!inView(wt.pts,T)) continue;
+      pathOf(wt.pts,T);
+      if(wt.line){ mctx.strokeStyle='hsla(200,80%,60%,.22)'; mctx.lineWidth=3*DPR; mctx.stroke(); }
+      else { mctx.closePath(); mctx.fillStyle='hsla(205,75%,45%,.10)'; mctx.fill();
+             mctx.strokeStyle='hsla(200,80%,65%,.18)'; mctx.lineWidth=1*DPR; mctx.stroke(); }
+    }
+    // roads: luminous filaments — majors glow wider, footpaths as fine dashes
+    for(const rd of osm.roads){
+      if(!inView(rd.pts,T)) continue;
+      pathOf(rd.pts,T);
+      if(rd.foot){
+        mctx.setLineDash([3*DPR,4*DPR]);
+        mctx.strokeStyle='hsla(258,45%,72%,.16)'; mctx.lineWidth=1*DPR;
+      } else {
+        mctx.setLineDash([]);
+        mctx.strokeStyle=`hsla(258,50%,74%,${rd.w>2?0.26:0.18})`;
+        mctx.lineWidth=rd.w*DPR;
+      }
+      mctx.lineCap='round'; mctx.lineJoin='round'; mctx.stroke();
+      mctx.setLineDash([]);
+    }
+    // buildings: blueprint architecture — faint body, crisp luminous edge
+    for(const bd of osm.buildings){
+      if(!inView(bd.pts,T)) continue;
+      pathOf(bd.pts,T); mctx.closePath();
+      mctx.fillStyle='hsla(252,40%,60%,.055)';
+      mctx.fill();
+      mctx.strokeStyle='hsla(252,65%,78%,.28)';
+      mctx.lineWidth=0.9*DPR; mctx.lineJoin='miter';
+      mctx.stroke();
+    }
+
+    /* cosmic compass ring */
+    const rcx=MW/2, rcy=MH/2, cr=Math.min(MW,MH)/2-14*DPR;
+    mctx.strokeStyle='rgba(210,200,255,.14)'; mctx.lineWidth=1*DPR;
+    mctx.beginPath(); mctx.arc(rcx,rcy,cr,0,Math.PI*2); mctx.stroke();
+    mctx.fillStyle='rgba(220,212,255,.4)';
+    mctx.font=`${8.5*DPR}px 'Space Grotesk',sans-serif`; mctx.textAlign='center'; mctx.textBaseline='middle';
+    for(const [lbl,azd] of [['N',0],['E',90],['S',180],['W',270]]){
+      const a=(azd-90)*RAD;
+      mctx.fillText(lbl, rcx+Math.cos(a)*cr, rcy+Math.sin(a)*cr-(azd===0?7*DPR:azd===180?-7*DPR:0));
+    }
+    if(cosmos){
+      for(const b of cosmos.bodies){
+        const a=(b.az-90)*RAD, up=b.alt>0;
+        const x=rcx+Math.cos(a)*cr, y=rcy+Math.sin(a)*cr;
+        const isMoon=b.name==='Moon';
+        mctx.font=`${(isMoon?13:10.5)*DPR}px serif`;
+        mctx.fillStyle=up
+          ? (isMoon?'rgba(240,235,255,.95)':`hsla(${52+b.az%40},80%,78%,.85)`)
+          : 'rgba(200,195,230,.18)';
+        if(up&&isMoon){ mctx.shadowColor='rgba(220,210,255,.8)'; mctx.shadowBlur=8*DPR; }
+        mctx.fillText(b.sym,x,y);
+        mctx.shadowBlur=0;
       }
     }
-    const lightAngle=(cosmic.siderealDegrees-90)*Math.PI/180;
-    let labelsDrawn=0;
-    for(const building of structureMap.buildings){
-      if(building.points.length<3) continue;
-      const screen=building.points.map(T);
-      const cx=screen.reduce((sum,p)=>sum+p[0],0)/screen.length;
-      const cy=screen.reduce((sum,p)=>sum+p[1],0)/screen.length;
-      const lift=(1.4+Math.min(building.levels,8)*.42)*DPR;
-      const dx=Math.cos(lightAngle)*lift, dy=Math.sin(lightAngle)*lift;
-      mctx.beginPath(); screen.forEach((p,index)=>index?mctx.lineTo(p[0]+dx,p[1]+dy):mctx.moveTo(p[0]+dx,p[1]+dy)); mctx.closePath();
-      mctx.fillStyle='rgba(2,1,9,.42)'; mctx.fill();
-      mctx.beginPath(); screen.forEach((p,index)=>index?mctx.lineTo(p[0],p[1]):mctx.moveTo(p[0],p[1])); mctx.closePath();
-      const architectureHue=hue+(building.levels%5)*7;
-      mctx.fillStyle=`hsla(${architectureHue},52%,48%,${.10+Math.min(building.levels,6)*.012})`;
-      mctx.strokeStyle=`hsla(${architectureHue+18},76%,76%,.34)`; mctx.lineWidth=.8*DPR; mctx.fill(); mctx.stroke();
-      // Roof facets make the real footprint feel architectural rather than utilitarian.
-      mctx.strokeStyle=`hsla(${architectureHue+28},65%,78%,.09)`; mctx.lineWidth=.45*DPR;
-      for(let i=0;i<screen.length-1;i+=2){ mctx.beginPath(); mctx.moveTo(cx,cy); mctx.lineTo(screen[i][0],screen[i][1]); mctx.stroke(); }
-      const width=Math.max(...screen.map(p=>p[0]))-Math.min(...screen.map(p=>p[0]));
-      const height=Math.max(...screen.map(p=>p[1]))-Math.min(...screen.map(p=>p[1]));
-      if(building.name && width*height>900*DPR*DPR && labelsDrawn<5){
-        mctx.fillStyle='rgba(238,232,255,.46)'; mctx.font=`${7*DPR}px 'Space Grotesk',sans-serif`; mctx.textAlign='center';
-        mctx.fillText(building.name,cx,cy+2*DPR); labelsDrawn++;
-      }
-    }
-    mctx.restore();
 
-    // Geolocation-oriented celestial context. It is displayed, never used as
-    // proof of emotion or as a causal input to a person's acoustic vibe.
-    refreshCosmic();
-    mctx.save();
-    mctx.globalCompositeOperation='source-over';
-    const skyX=MW*.83, skyY=MH*.30, skyR=Math.min(MW,MH)*.055;
-    for(let i=0;i<cosmic.planets.length;i++){
-      const planet=cosmic.planets[i], radius=skyR*(1+i*.34);
-      const angle=(planet.longitude-cosmic.siderealDegrees)*Math.PI/180-Math.PI/2;
-      mctx.strokeStyle='rgba(190,180,255,.055)'; mctx.lineWidth=.7*DPR;
-      mctx.beginPath(); mctx.arc(skyX,skyY,radius,0,Math.PI*2); mctx.stroke();
-      const x=skyX+Math.cos(angle)*radius, y=skyY+Math.sin(angle)*radius;
-      mctx.fillStyle='rgba(224,216,255,.48)'; mctx.font=`${8*DPR}px serif`; mctx.textAlign='center';
-      mctx.fillText(planet.symbol,x,y+3*DPR);
-    }
-    const moonAngle=(cosmic.moon.phase*Math.PI*2)-Math.PI/2;
-    const moonRadius=skyR*2.65;
-    mctx.fillStyle='rgba(255,232,175,.68)'; mctx.font=`${10*DPR}px serif`;
-    mctx.fillText('☾',skyX+Math.cos(moonAngle)*moonRadius,skyY+Math.sin(moonAngle)*moonRadius);
-    mctx.restore();
-
-    // topographic contours — curvature field around golden zone + you
-    mctx.globalCompositeOperation='source-over';
+    /* topo contours */
     const centers=[{p:pos,h:hue,k:0}]; if(best.has) centers.push({p:best,h:vibeHue(best.v),k:1});
     for(const c of centers){
       const [ccx,ccy]=T(c.p);
       for(let ring=1;ring<=6;ring++){
-        const rBase=ring*(Math.min(MW,MH)*0.09);
+        const rBase=ring*(Math.min(MW,MH)*0.085);
         mctx.beginPath();
         for(let a=0;a<=64;a++){
           const ang=a/64*Math.PI*2;
           const n=Math.sin(ang*3+ring*1.7+t*(c.k?0.5:0.8))*0.10+Math.sin(ang*5-ring+t*0.6)*0.06;
           const r=rBase*(1+n);
-          const x=ccx+Math.cos(ang)*r, y=ccy+Math.sin(ang)*r;
-          a===0? mctx.moveTo(x,y): mctx.lineTo(x,y);
+          const x=ccx+Math.cos(ang)*r,y=ccy+Math.sin(ang)*r;
+          a===0?mctx.moveTo(x,y):mctx.lineTo(x,y);
         }
         mctx.closePath();
-        mctx.strokeStyle=`hsla(${c.h},70%,70%,${(c.k?0.10:0.07)*(1-ring/7)})`;
-        mctx.lineWidth=1*DPR;
-        mctx.stroke();
+        mctx.strokeStyle=`hsla(${c.h},70%,70%,${(c.k?0.10:0.06)*(1-ring/7)})`;
+        mctx.lineWidth=1*DPR; mctx.stroke();
       }
     }
 
     mctx.globalCompositeOperation='lighter';
-    // trail — your path, colored by the vibe you felt there
     for(let i=1;i<trail.length;i++){
-      const a=trail[i-1], b=trail[i];
-      const [x0,y0]=T(a), [x1,y1]=T(b);
-      const h=vibeHue(b.vibe);
-      const age=i/trail.length;
+      const a=trail[i-1],b=trail[i];
+      const [x0,y0]=T(a),[x1,y1]=T(b);
+      const h=vibeHue(b.vibe), age=i/trail.length;
       mctx.strokeStyle=`hsla(${h},90%,66%,${0.12+age*0.5})`;
       mctx.lineWidth=(1.6+b.vibe*2.4)*DPR; mctx.lineCap='round';
       mctx.beginPath(); mctx.moveTo(x0,y0); mctx.lineTo(x1,y1); mctx.stroke();
-      // vibe beads
       if(i%4===0){
         mctx.fillStyle=`hsla(${h},95%,72%,${0.25+b.vibe*0.4})`;
         mctx.beginPath(); mctx.arc(x1,y1,(1.5+b.vibe*2)*DPR,0,Math.PI*2); mctx.fill();
       }
     }
-    // Latest anonymous acoustic signature for each detected dominant voice.
-    const latestVoices=new Map();
-    for(const mark of voiceMarks) latestVoices.set(mark.personId,mark);
-    for(const mark of latestVoices.values()){
-      const [vx,vy]=T(mark), vh=vibeHue(mark.vibe);
-      mctx.fillStyle=`hsla(${vh},95%,76%,.9)`;
-      mctx.beginPath(); mctx.arc(vx,vy,3.2*DPR,0,Math.PI*2); mctx.fill();
-      mctx.fillStyle='rgba(255,255,255,.72)'; mctx.font=`${8*DPR}px 'Space Grotesk',sans-serif`; mctx.textAlign='left';
-      mctx.fillText(`P${mark.personId} · ${Math.round(mark.vibe*100)}`,vx+6*DPR,vy-5*DPR);
-    }
-    // golden zone marker
-    if(best.has && best.v>0.55){
+    if(best.has&&best.v>0.55){
       const [bx,by]=T(best);
-      const pr=(6+Math.sin(t*3)*2)*DPR + gzPing*22*DPR; gzPing*=0.93;
-      mctx.strokeStyle=`hsla(46,100%,72%,${0.6})`;
-      mctx.lineWidth=1.4*DPR;
+      const pr=(6+Math.sin(t*3)*2)*DPR+gzPing*22*DPR; gzPing*=0.93;
+      mctx.strokeStyle='hsla(46,100%,72%,.6)'; mctx.lineWidth=1.4*DPR;
       mctx.beginPath(); mctx.arc(bx,by,pr,0,Math.PI*2); mctx.stroke();
       mctx.fillStyle='hsla(46,100%,80%,.9)';
       mctx.beginPath(); mctx.arc(bx,by,2.6*DPR,0,Math.PI*2); mctx.fill();
     }
-    // you — pulsing dot + heading tick
     const [px,py]=T(pos);
     const g=mctx.createRadialGradient(px,py,0,px,py,14*DPR);
     g.addColorStop(0,`hsla(${hue},95%,75%,.9)`); g.addColorStop(1,'hsla(0,0%,0%,0)');
     mctx.fillStyle=g; mctx.beginPath(); mctx.arc(px,py,14*DPR,0,Math.PI*2); mctx.fill();
-    mctx.fillStyle='#fff';
-    mctx.beginPath(); mctx.arc(px,py,3*DPR,0,Math.PI*2); mctx.fill();
+    mctx.fillStyle='#fff'; mctx.beginPath(); mctx.arc(px,py,3*DPR,0,Math.PI*2); mctx.fill();
     mctx.strokeStyle='rgba(255,255,255,.7)'; mctx.lineWidth=1.5*DPR;
     mctx.beginPath(); mctx.moveTo(px,py);
-    mctx.lineTo(px+Math.sin(heading)*10*DPR, py-Math.cos(heading)*10*DPR); mctx.stroke();
+    mctx.lineTo(px+Math.sin(heading)*10*DPR,py-Math.cos(heading)*10*DPR); mctx.stroke();
 
-    // labels
     if(frame%30===0){
-      coordsEl.textContent = lastLL
-        ? `${lastLL.lat.toFixed(5)}, ${lastLL.lng.toFixed(5)} · ±${Math.round(lastLL.accuracy)}m`
-        : 'locating…';
-      scaleEl.textContent = `${Math.round(60*DPR/scale)} m ——`;
+      coordsEl.textContent=lastLL
+        ?`${lastLL.lat.toFixed(5)}, ${lastLL.lng.toFixed(5)} · ±${Math.round(lastLL.accuracy)}m${osm.fetching?' · mapping…':''}`
+        :'locating…';
+      scaleEl.textContent=`${Math.round(60*DPR/scale)} m ——`;
     }
   }
 
-  /* ---------------- readout ---------------- */
-  const words=[[0,'quiet field'],[0.22,'finding the pattern…'],[0.38,'energy gathering'],
-    [0.50,'good energy'],[0.62,'uplifted field'],[0.74,'golden current'],[0.86,'radiant chorus ✦']];
-  const vWords=[[0,'guarded energy'],[0.32,'grounded energy'],[0.48,'open energy'],[0.64,'uplifted energy'],[0.8,'radiant energy ✦']];
+  /* ================= readout ================= */
+  const words=[[0,'heavy air'],[0.22,'finding the vibe…'],[0.38,'warming up'],
+    [0.50,'good energy'],[0.62,'really good vibes'],[0.74,'golden zone'],[0.86,'pure magic ✦']];
   let lastWord='';
   function updateReadout(){
     if(!running) return;
     let w=words[0][1]; for(const [th,l] of words) if(vibe>=th) w=l;
-    if(w!==lastWord){ lastWord=w; vibeWordEl.textContent=w; }
-    vibeScoreEl.textContent=Math.round(vibe*100)+' · acoustic field';
-    moveTag.style.opacity = moveLevel>0.14 ? 1 : 0;
-
-    const recentPeople=speakerTracker.people.filter(person=>Date.now()-person.lastSeen<45000);
-    if(recentPeople.length){
-      peoplePanel.classList.add('on');
-      peopleList.innerHTML=recentPeople.map(person=>{
-        let label=vWords[0][1]; for(const [threshold,text] of vWords) if(person.vibe>=threshold) label=text;
-        return `<div class="personRow"><b>${person.label}</b><span>${label} · ${Math.round(person.vibe*100)}</span></div>`;
-      }).join('');
-    }
-
-    if(voiceConf>0.5 && activePerson){
+    if(w!==lastWord){lastWord=w;vibeWordEl.textContent=w;}
+    vibeScoreEl.textContent=Math.round(vibe*100)+' · vibe';
+    moveTag.style.opacity=moveLevel>0.14?1:0;
+    if(voiceConf>0.5){
       voiceChip.classList.add('on');
-      let vw=vWords[0][1]; for(const [th,l] of vWords) if(voiceVibe>=th) vw=l;
       const vh=vibeHue(voiceVibe);
       vcIcon.style.color=`hsl(${vh},90%,72%)`;
-      vcLabel.textContent=`${activePerson.label} · ${Math.round(voiceVibe*100)}`;
-      vcSub.textContent=vw+(voicePitch?` · ${Math.round(voicePitch)} hz`:'');
-    } else if(voiceConf<0.25){
-      voiceChip.classList.remove('on');
-    }
+      vcLabel.textContent='VOICE · '+Math.round(voiceVibe*100);
+      vcSub.textContent=emoWord+(voicePitch?` · ${Math.round(voicePitch)} hz`:'');
+    } else if(voiceConf<0.25){ voiceChip.classList.remove('on'); }
   }
 
-  /* ---------------- start ---------------- */
-  document.getElementById('startBtn').addEventListener('click', async ()=>{
-    // motion + orientation permission must be inside the tap on iOS
+  /* ================= start ================= */
+  $('startBtn').addEventListener('click', async ()=>{
     try{ if(window.DeviceMotionEvent?.requestPermission){ await DeviceMotionEvent.requestPermission(); } }catch(e){}
     try{ if(window.DeviceOrientationEvent?.requestPermission){ await DeviceOrientationEvent.requestPermission(); } }catch(e){}
-    addEventListener('devicemotion', onMotion);
-    addEventListener('deviceorientation', onOrient);
+    addEventListener('devicemotion',onMotion);
+    addEventListener('deviceorientation',onOrient);
     try{
       await startAudio();
       startGeo();
-      document.getElementById('startOverlay').classList.add('hidden');
+      computeCosmos();
+      $('startOverlay').classList.add('hidden');
       readout.style.opacity=1;
       mapCard.classList.add('on');
       setTimeout(resize,120);
